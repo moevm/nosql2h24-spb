@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  backend:
+    image: nosql-spb-backend
+    container_name: backend
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      NEO4J_DB: neo4j
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: password
+      NEO4J_SCHEME: neo4j
+      NEO4J_HOST: db
+      NEO4J_PORT: 7687
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    volumes:
+      - ./server:/app
+    networks:
+      - nosql-spb-net
+
+  db:
+    image: neo4j:5.23.0
+    container_name: db
+    environment:
+      NEO4J_AUTH: neo4j/password
+    restart: always
+    networks:
+      - nosql-spb-net
+    healthcheck:
+      test: "wget http://localhost:7474/  || exit 1"
+      interval: 10s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+
+
+
+networks:
+  nosql-spb-net:
