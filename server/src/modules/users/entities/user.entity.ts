@@ -5,7 +5,7 @@ export class User {
         this.id = elementId;
         this.name = name;
         this.email = email;
-        this.password = password;
+        this._password = password;
         this.role = role;
         this.createdAt = createdAt;
     }
@@ -15,7 +15,7 @@ export class User {
     email: string;
 
     @Exclude()
-    password: string;
+    _password: string;
 
     role: string;
     createdAt: string;

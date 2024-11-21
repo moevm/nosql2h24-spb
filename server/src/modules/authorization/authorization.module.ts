@@ -28,7 +28,7 @@ import {JwtGuard} from "./jwt.guard";
         {
             inject: [ConfigService],
             provide: JWT_SECRET,
-            useFactory: (configService: ConfigService): string => configService.get('JWT_SECRET') ?? 'secret',
+            useFactory: (configService: ConfigService): string => configService.get('JWT_SECRET'),
         },
         {provide: 'APP_GUARD', useClass: JwtGuard},
     ],
