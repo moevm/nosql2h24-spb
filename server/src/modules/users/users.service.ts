@@ -2,6 +2,7 @@ import {Injectable, NotFoundException, OnModuleInit} from '@nestjs/common';
 import {CreateUserDto} from './dto/create-user.dto';
 import {Neo4jService} from "../neo4j/neo4j.service";
 import {User} from "./entities/user.entity";
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -22,11 +23,12 @@ export class UsersService implements OnModuleInit {
     async create(createUserDto: CreateUserDto) {
         const session = this.neo4jService.getWriteSession();
         try {
+            const passwordHash = await bcrypt.hash(createUserDto.password, 10);
             const result = await session.run(
                 `CREATE (user :User {
                     name: "${createUserDto.name}", 
                     email: "${createUserDto.email}", 
-                    password: "${createUserDto.password}",
+                    password: "${passwordHash}",
                     role: "${createUserDto.role}",
                     created_at: Datetime()
                 }) RETURN user`);
@@ -63,7 +65,6 @@ export class UsersService implements OnModuleInit {
             await session.close();
         }
     }
-
 
     async findOne(id: string) {
         const session = this.neo4jService.getReadSession();
