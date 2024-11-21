@@ -1,6 +1,7 @@
 import {Body, Controller, Get, Param, Post, UsePipes, ValidationPipe} from '@nestjs/common';
 import {PointsOfInterestService} from './points-of-interest.service';
 import {CreatePointOfInterestDto} from "./dto/create-point-of-interest.dto";
+import {Public} from "../authorization/public.decorator";
 
 @Controller("/api/poi")
 export class PointsOfInterestController {
@@ -13,11 +14,13 @@ export class PointsOfInterestController {
         return await this.pointsOfInterestService.create(createPointsOfInterestDto);
     }
 
+    @Public()
     @Get()
     findAll() {
         return this.pointsOfInterestService.findAll();
     }
 
+    @Public()
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.pointsOfInterestService.findOne(id);
