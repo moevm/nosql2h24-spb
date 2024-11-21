@@ -4,6 +4,7 @@ import {AppController} from './app.controller';
 import {Neo4jModule} from './modules/neo4j/neo4j.module';
 import {Neo4jConfig} from './modules/neo4j/neo4j-config.interface';
 import {PointsOfInterestModule} from './modules/points-of-interest/points-of-interest.module';
+import {UsersModule} from "./modules/users/users.module";
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import {PointsOfInterestModule} from './modules/points-of-interest/points-of-int
             }),
         }),
         PointsOfInterestModule,
+        UsersModule,
     ],
     controllers: [AppController],
     providers: [],
