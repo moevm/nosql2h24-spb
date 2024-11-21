@@ -37,6 +37,7 @@ export class UsersService implements OnModuleInit {
                 node.elementId,
                 node.properties.name,
                 node.properties.email,
+                node.properties.password,
                 node.properties.role,
                 node.properties.created_at.toString(),
             );
@@ -57,6 +58,7 @@ export class UsersService implements OnModuleInit {
                     node.elementId,
                     node.properties.name,
                     node.properties.email,
+                    node.properties.password,
                     node.properties.role,
                     node.properties.created_at.toString(),
                 );
@@ -71,7 +73,7 @@ export class UsersService implements OnModuleInit {
         try {
             const result = await session.run(
                 `MATCH (user :User WHERE elementId(user) = "${id}") RETURN user`
-            )
+            );
             const node = result.records.at(0)?.get('user');
             if (!node) {
                 throw new NotFoundException(`User with id: ${id} not found`);
@@ -80,6 +82,7 @@ export class UsersService implements OnModuleInit {
                 node.elementId,
                 node.properties.name,
                 node.properties.email,
+                node.properties.password,
                 node.properties.role,
                 node.properties.created_at.toString(),
             );
