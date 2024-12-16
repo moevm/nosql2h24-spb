@@ -16,7 +16,7 @@
             label="Укажите Имя"
           />
           <Btn label="Зарегистрироваться" class="custom-margin"/>
-          <div style="display: inline;">
+          <div style="display: inline; text-align: center;">
             Уже Зарегистрированы? <a display: inline href="/login">Войдите!</a>
           </div>
         </v-card-text>
