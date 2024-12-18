@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vuepress/dist/
+.nuxt/
+Dockerfile
+.dockerignore
+.env
+store/
+.gitignore
