@@ -4,5 +4,6 @@ dist/
 .nuxt/
 Dockerfile
 .dockerignore
+.env
 store/
 .gitignore

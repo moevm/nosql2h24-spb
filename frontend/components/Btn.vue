@@ -2,6 +2,7 @@
     <v-btn
         color="accent"
         class="btn"
+        @click="$emit('click')"
     >
         {{ label }}
     </v-btn>
@@ -10,10 +11,10 @@
 <script>
     export default {
         props: {
-        label: {
-            type: String,
-            required: true
-        }
+            label: {
+                type: String,
+                required: true
+            }
         }
     }
 </script>

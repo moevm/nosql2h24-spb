@@ -6,6 +6,12 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+ARG BACKEND_HOST
+ARG BACKEND_PORT
+RUN echo BACKEND_HOST=${BACKEND_HOST} > ./.env
+RUN echo BACKEND_PORT=${BACKEND_PORT} >> ./.env
+
 RUN npm run generate
 
 FROM node:23.3

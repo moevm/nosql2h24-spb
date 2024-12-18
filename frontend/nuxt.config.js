@@ -2,6 +2,11 @@ import colors from 'vuetify/es5/util/colors'
 
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
+  publicRuntimeConfig: {
+    backendHost: process.env.BACKEND_HOST,
+    backendPort: process.env.BACKEND_PORT,
+    shit: process.env
+  },
   head: {
     titleTemplate: '%s - frontend',
     title: 'frontend',
