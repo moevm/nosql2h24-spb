@@ -9,11 +9,13 @@
           <TextField
             label="Почта"
             v-model="email"
+            :messages="emailMessages"
           />
           <TextField
             label="Пароль"
             v-model="password"
             type="password"
+            :messages="passwordMessages"
           />
           <Btn label="Вход" class="custom-margin" @click="handleRegistration"/>
           <div style="display: inline; text-align: center;">
@@ -31,24 +33,46 @@ export default {
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      emailMessages: '',
+      passwordMessages: ''
     }
   },
   methods: {
     async handleRegistration() {
       const { email, password } = this;
-      const backendUrl = `${this.$config.backendHost}:${this.$config.backendPort}/signInDto`;
-      try {
-        const response = await this.$axios.post(backendUrl, { email, password });
-        if (response.status === 200) {
-          console.log('Успешная авторизация:', response.data);
-          // Здесь можно перенаправить пользователя на другую страницу
-          this.$router.push('/');
-        } else {
-          console.error('Ошибка авторизации:', response.data);
-        }
-      } catch (error) {
+      const emailRegExp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+      if (!emailRegExp.test(email)) {
+        this.emailMessages = 'Некорректный email';
+        this.passwordMessages = '';
+        return;
+      }
+      const response = await this.$axios.post('/api/auth/signIn', { email, password });
+      localStorage.setItem('access_token', response.data.access_token);
+      console.log(response);
+      if (response.status === 200) {
+        console.log('Успешная авторизация');
+        this.password = '';
+        this.email = '';
+        this.passwordMessages = '';
+        this.emailMessages = '';
+        this.$router.push('/');
+      }
+      else {
         console.error('Ошибка при отправке данных:', error);
+        if (error.response.status === 404) {
+          this.emailMessages = 'Пользователя с такой почтой не существует';
+          this.passwordMessages = '';
+        }
+        else if (error.response.status === 401) {
+          this.emailMessages = '';
+          this.passwordMessages = 'Неверный пароль';
+        }
+        else {
+          console.error('Что то пошло не так:', error, response);
+          this.passwordMessages = 'Что то пошло не так';
+          this.emailMessages = 'Что то пошло не так';          
+        }
       }
     }
   }

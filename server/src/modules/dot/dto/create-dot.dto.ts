@@ -4,7 +4,7 @@ import {Type} from "class-transformer";
 
 export class CreateDotDto {
     @IsObject()
-    @ValidateNested()
+    // @ValidateNested()
     @Type(() => Point)
     location: Point;
 }
