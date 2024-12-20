@@ -1,4 +1,4 @@
-import {IsObject, IsString, IsNumber, MaxLength, MinLength, ValidateNested} from "class-validator";
+import {IsString, IsNumber, MaxLength, MinLength} from "class-validator";
 
 export class CreateRouteDto {
     @IsString()
