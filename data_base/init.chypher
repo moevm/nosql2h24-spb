@@ -1,0 +1,20 @@
+MATCH (n) 
+DETACH DELETE n; 
+ 
+// Создаем узлы 
+CREATE  (user: User {name: 'user', role: 'user', email: '', password: '', created_at: datetime()}),
+        (admin: User {name: 'admin', role: 'admin', email: '', password: '', created_at: datetime()}),
+
+        ()
+
+CREATE (a:Person {name: 'Alice', age: 30}), 
+       (b:Person {name: 'Bob', age: 25}), 
+       (c:Person {name: 'Charlie', age: 35}); 
+ 
+// Создаем отношения 
+CREATE (a)-[:FRIENDS_WITH]->(b), 
+       (b)-[:FRIENDS_WITH]->(c), 
+       (c)-[:FRIENDS_WITH]->(a); 
+ 
+// Создаем индекс для улучшения производительности 
+// CREATE INDEX ON :Person(name);
