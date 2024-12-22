@@ -1,22 +1,22 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
-import {CreateDotDto} from "./dto/create-dot.dto";
+import {CreateIntersectionDto} from "./dto/create-intersection.dto";
 import {Neo4jService} from "../neo4j/neo4j.service";
-import Dot from "./entities/dot.entity";
+import Intersection from "./entities/intersection.entity";
 
 
 @Injectable()
-export class DotsService {
+export class IntersectionsService {
 
     constructor(private readonly neo4jService: Neo4jService) {
     }
 
-    async create(dto: CreateDotDto) {
+    async create(dto: CreateIntersectionDto) {
         const session = this.neo4jService.getWriteSession();
         try {
             // const result = await session.run(
             //     `WITH point({latitude: ${dto.location.latitude}, longitude: ${dto.location.longitude}}) AS l
             //     CALL (l) {        
-            //         MATCH (i: Intersection WHERE point.distance(i.location, l) < ${(DotsService.FIND_INTERSECTION_RADIUS)}) 
+            //         MATCH (i: Intersection WHERE point.distance(i.location, l) < ${(IntersectionsService.FIND_INTERSECTION_RADIUS)}) 
             //         RETURN i 
             //         ORDER BY point.distance(i.location, l) ASC 
             //         LIMIT 1
@@ -46,14 +46,14 @@ export class DotsService {
         const session = this.neo4jService.getReadSession();
         try {
             const result = await session.run(
-                `MATCH (dot :Dot) RETURN dot`
+                `MATCH (intersection :Intersection) RETURN intersection`
             )
             return result.records.map(record => {
-                const node = record.get('dot');
-                return new Dot(
+                const node = record.get('intersection');
+                return new Intersection(
                     node.elementId,
                     node.properties.location,
-                    node.properties.time.toString()
+                    node.properties.count_streets,
                 );
             });
         } finally {
@@ -65,16 +65,16 @@ export class DotsService {
         const session = this.neo4jService.getReadSession();
         try {
             const result = await session.run(
-                `MATCH (dot :Dot WHERE elementId(dot) = "${id}") RETURN dot`
+                `MATCH (intersection :Intersection WHERE elementId(intersection) = "${id}") RETURN intersection`
             )
-            const node = result.records.at(0)?.get('dot');
+            const node = result.records.at(0)?.get('intersection');
             if (!node) {
-                throw new NotFoundException(`Dot with id: ${id} not found`);
+                throw new NotFoundException(`Intersection with id: ${id} not found`);
             }
-            return new Dot(
+            return new Intersection(
                 node.elementId,
                 node.properties.location,
-                node.properties.time.toString(),
+                node.properties.count_streets,
             );
         } finally {
             await session.close();
