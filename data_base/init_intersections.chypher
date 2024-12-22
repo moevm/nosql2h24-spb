@@ -1,0 +1,13 @@
+MATCH (n) 
+DETACH DELETE n; 
+ 
+// Создаем узлы 
+CREATE (intersection: Intersection {id: '', lat: '', lon: '', intersection_num: ''})
+ 
+// Создаем отношения 
+CREATE (a)-[:FRIENDS_WITH]->(b), 
+       (b)-[:FRIENDS_WITH]->(c), 
+       (c)-[:FRIENDS_WITH]->(a); 
+ 
+// Создаем индекс для улучшения производительности 
+// CREATE INDEX ON :Person(name);

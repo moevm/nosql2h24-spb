@@ -2,10 +2,10 @@ MATCH (n)
 DETACH DELETE n; 
  
 // Создаем узлы 
-CREATE  (user: User {name: 'user', role: 'user', email: '', password: '', created_at: datetime()}),
-        (admin: User {name: 'admin', role: 'admin', email: '', password: '', created_at: datetime()}),
+CREATE (user_0: User {name: 'user', role: 'user', email: '', password: '', created_at: datetime()}),
+       (user_1: User {name: 'admin', role: 'admin', email: '', password: '', created_at: datetime()}),
 
-        ()
+       (intersection: Intersection {id: '', lat: '', lon: '', intersection_num: ''})
 
 CREATE (a:Person {name: 'Alice', age: 30}), 
        (b:Person {name: 'Bob', age: 25}), 
