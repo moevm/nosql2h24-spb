@@ -4,8 +4,7 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   publicRuntimeConfig: {
     backendHost: process.env.BACKEND_HOST,
-    backendPort: process.env.BACKEND_PORT,
-    shit: process.env
+    backendPort: process.env.BACKEND_PORT
   },
   head: {
     titleTemplate: '%s - frontend',
@@ -30,6 +29,8 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '~/plugins/axios.js',
+    {src: '~/plugins/auth.js', mode: 'client'}
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -43,7 +44,11 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    '@nuxtjs/axios'
   ],
+  axios: {
+    baseURL: `http://${process.env.BACKEND_HOST}:${process.env.BACKEND_PORT}`
+  },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
@@ -70,7 +75,7 @@ export default {
           secondary: '#9FADBF',
           info: '#DEDEDF',
           warning: '#FF9800',
-          error: '#F44336',
+          error: '#B65B5B',
           success: '#4CAF50'
         },
       }
