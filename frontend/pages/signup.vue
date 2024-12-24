@@ -6,23 +6,10 @@
           Регистрация
         </v-card-title>
         <v-card-text class="d-flex flex-column align-center">
-          <TextField
-            label="Укажите почту"
-            v-model="email"
-            :messages="emailMessages"
-          />
-          <TextField
-            label="Придумайте пароль"
-            v-model="password"
-            type="password"
-            :messages="passwordMessages"
-          />
-          <TextField
-            label="Укажите Имя"
-            v-model="name"
-            :messages="nameMessages"
-          />
-          <Btn label="Зарегистрироваться" class="custom-margin" @click="handleRegistration"/>
+          <TextField label="Укажите почту" v-model="email" :messages="emailMessages" />
+          <TextField label="Придумайте пароль" v-model="password" type="password" :messages="passwordMessages" />
+          <TextField label="Укажите Имя" v-model="name" :messages="nameMessages" />
+          <Btn label="Зарегистрироваться" class="custom-margin" @click="handleRegistration" />
           <div style="display: inline; text-align: center;">
             Уже Зарегистрированы? <nuxt-link to="/signin">Войдите!</nuxt-link>
           </div>
@@ -49,14 +36,14 @@ export default {
     async handleRegistration() {
       const { email, password, name } = this;
       const emailRegExp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-      
+
       if (!emailRegExp.test(email)) {
         this.emailMessages = 'Некорректный email';
         this.passwordMessages = '';
         this.nameMessages = '';
         return;
       }
-      
+
       if (password.length < 6) {
         this.passwordMessages = 'Пароль должен содержать не менее 6 символов';
         this.emailMessages = '';
@@ -70,35 +57,34 @@ export default {
         this.passwordMessages = '';
         return;
       }
-      
-      try {
-        console.log('send reg req');
-        const response = await this.$axios.post('/api/auth/signUp', { email, password, name });
-        localStorage.setItem('access_token', response.data.access_token);
-        localStorage.getItem('user_id', response.data.user.id)
-
-        if (response.status === 201) {
-          console.log('Успешная регистрация');
-          this.password = '';
-          this.email = '';
-          this.name = '';
-          this.passwordMessages = '';
-          this.emailMessages = '';
-          this.nameMessages = '';
-          this.$router.push('/');
+      console.log('send reg req');
+      $fetch(`${this.$config.public.backendUrl}/api/auth/signUp`, {
+        method: 'POST',
+        body: { email, password, name },
+        onResponse: ({ request, response, options }) => {
+          localStorage.setItem('access_token', response._data.access_token);
+          console.log('ответ', response.status);
+          if (response.status === 201) {
+            console.log('Успешная регистрация');
+            this.password = '';
+            this.email = '';
+            this.name = '';
+            this.passwordMessages = '';
+            this.emailMessages = '';
+            this.nameMessages = '';
+            this.$router.push('/');
+          }
+          else if (response.status === 409) {
+            this.emailMessages = 'Пользователь с такой почтой уже существует';
+            this.passwordMessages = '';
+            this.nameMessages = '';
+          } else {
+            this.passwordMessages = 'Что-то пошло не так';
+            this.emailMessages = 'Что-то пошло не так';
+            this.nameMessages = 'Что-то пошло не так';
+          }
         }
-      } catch (error) {
-        console.error('Ошибка при отправке данных:', error);
-        if (error.response.status === 409) {
-          this.emailMessages = 'Пользователь с такой почтой уже существует';
-          this.passwordMessages = '';
-          this.nameMessages = '';
-        } else {
-          this.passwordMessages = 'Что-то пошло не так';
-          this.emailMessages = 'Что-то пошло не так';
-          this.nameMessages = 'Что-то пошло не так';
-        }
-      }
+      })
     }
   }
 }
