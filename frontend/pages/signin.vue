@@ -9,6 +9,19 @@
           <TextField label="Почта" v-model="email" :messages="emailMessages" />
           <TextField label="Пароль" v-model="password" type="password" :messages="passwordMessages" />
           <Btn label="Вход" class="custom-margin" @click="handleRegistration" />
+          <TextField
+            label="Почта"
+            v-model="email"
+            :messages="emailMessages"
+          />
+          <TextField
+            label="Пароль"
+            v-model="password"
+            type="password"
+            :messages="passwordMessages"
+          />
+
+          <Btn label="Вход" class="custom-margin" @click="handleRegistration"/>
           <div style="display: inline; text-align: center;">
             В первый раз? <nuxt-link to="/signup">Зарегистрируйтесь!</nuxt-link>
           </div>
@@ -38,34 +51,64 @@ export default {
         this.passwordMessages = '';
         return;
       }
-      const response = await this.$axios.post('/api/auth/signIn', { email, password });
-      localStorage.setItem('access_token', response.data.access_token);
-      localStorage.setItem('user_id', response.data.user.id)
-      console.log(response);
-      if (response.status === 200) {
-        console.log('Успешная авторизация');
-        this.password = '';
-        this.email = '';
-        this.passwordMessages = '';
-        this.emailMessages = '';
-        this.$router.push('/');
-      }
-      else {
-        console.error('Ошибка при отправке данных:', error);
-        if (error.response.status === 404) {
-          this.emailMessages = 'Пользователя с такой почтой не существует';
-          this.passwordMessages = '';
+      await $fetch(`${this.$config.public.backendUrl}/api/auth/signIn`, {
+        method: 'POST',
+        body: { email, password },
+        onResponse: ({ request, response, options }) => {
+          console.log('asdasd',response);
+          if (response.status === 200) {
+            console.log('Успешная авторизация', request);
+            this.password = '';
+            this.email = '';
+            this.passwordMessages = '';
+            this.emailMessages = '';
+            localStorage.setItem('access_token', response._data.access_token);
+            this.$router.push('/');
+          }
+          else {
+            console.error('Ошибка при отправке данных:', response.statusText);
+            if (response.status === 404) {
+              this.emailMessages = 'Пользователя с такой почтой не существует';
+              this.passwordMessages = '';
+            }
+            else if (response.status === 401) {
+              this.emailMessages = '';
+              this.passwordMessages = 'Неверный пароль';
+            }
+            else {
+              console.error('Что то пошло не так:', response.statusText);
+              this.passwordMessages = 'Что то пошло не так';
+              this.emailMessages = 'Что то пошло не так';          
+            }
+          }
         }
-        else if (error.response.status === 401) {
-          this.emailMessages = '';
-          this.passwordMessages = 'Неверный пароль';
-        }
-        else {
-          console.error('Что то пошло не так:', error, response);
-          this.passwordMessages = 'Что то пошло не так';
-          this.emailMessages = 'Что то пошло не так';
-        }
-      }
+      })
+      // console.log(error, status)
+      // if (status.value === 200) {
+      //   console.log('Успешная авторизация');
+      //   localStorage.setItem('access_token', data.access_token);
+      //   this.password = '';
+      //   this.email = '';
+      //   this.passwordMessages = '';
+      //   this.emailMessages = '';
+      //   this.$router.push('/');
+      // }
+      // else {
+      //   console.error('Ошибка при отправке данных:', error);
+      //   if (status.value === 404) {
+      //     this.emailMessages = 'Пользователя с такой почтой не существует';
+      //     this.passwordMessages = '';
+      //   }
+      //   else if (status.value === 401) {
+      //     this.emailMessages = '';
+      //     this.passwordMessages = 'Неверный пароль';
+      //   }
+      //   else {
+      //     console.error('Что то пошло не так:', error);
+      //     this.passwordMessages = 'Что то пошло не так';
+      //     this.emailMessages = 'Что то пошло не так';          
+      //   }
+      // }
     }
   }
 }

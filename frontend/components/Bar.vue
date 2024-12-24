@@ -11,6 +11,7 @@
       <v-btn
         icon
         class="mx-7"
+        @click="navigateTo('/')"
       >
         <img src="~/assets/icons/user.svg" class="icon-svg"/>
       </v-btn>
@@ -18,7 +19,7 @@
       <v-btn
         icon
         class="mx-7"
-        @click="$router.push('/map')"
+        @click="navigateTo('/map')"
       >
         <img src="~/assets/icons/map.svg" />
       </v-btn>

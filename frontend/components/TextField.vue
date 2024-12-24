@@ -4,8 +4,8 @@
     :type="type"
     v-model="inputValue"
     @input="$emit('input', $event)"
-    solo
     class="text-field"
+    variant="solo"
     elevation="4"
     :messages="messages"
     >
@@ -54,6 +54,11 @@
         /* padding: 0 0; */
         background-color: transparent;
     }
+    .text-field .v-field {
+        border-radius: 20px;
+        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px 0 rgba(0, 0, 0, 0.25) !important;
+        background-color: transparent;
+    }
     .text-field .v-label {
         color: #DEDEDF;
         font-size: 20px;
@@ -62,7 +67,6 @@
         height: 55px;
         /* background: red !important; */
         /* box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25) !important; */
-        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px 0 rgba(0, 0, 0, 0.25) !important;
         border-radius: 20px;
     }
     .text-field .v-messages {

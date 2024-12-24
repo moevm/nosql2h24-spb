@@ -1,50 +1,47 @@
 <template>
-    <v-app dark>
-      <Bar />
-      <v-main fluid>
-        <Nuxt />
-      </v-main>
-    </v-app>
-  </template>
-  
-  <script>
-  export default {
-    name: 'MapLayout',
-    data () {
-      return {
-        clipped: false,
-        drawer: false,
-        fixed: false,
-        items: [
-          {
-            icon: 'mdi-apps',
-            title: 'Welcome',
-            to: '/'
-          },
-          {
-            icon: 'mdi-chart-bubble',
-            title: 'Inspire',
-            to: '/inspire'
-          }
-        ],
-        miniVariant: false,
-        right: true,
-        rightDrawer: false,
-        title: 'Vuetify.js'
-      }
+  <v-app dark>
+    <Bar />
+    <!-- <v-navigation-drawer
+      color="blue"
+      v-model="drawer"
+      width="400"
+      style="z-index: 1000;"
+    >
+    </v-navigation-drawer>
+    <v-btn
+      class="ma-2"
+      icon
+      @click="drawer = !drawer"
+      style="z-index: 1001;"
+    >
+      <v-icon>mdi-{{ `chevron-${drawer ? 'right' : 'left'}` }}</v-icon>
+    </v-btn> -->
+    <v-main style="height: 100vh; overflow: hidden;">
+      <slot />
+    </v-main>
+  </v-app>
+</template>
+
+<script>
+export default {
+  name: 'MapLayout',
+  data() {
+    return {
+      drawer: true
     }
   }
-  </script>
-  
-  <style scoped>
-    #app {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      /* background-image: url("~/assets/background.png"); */
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-  </style>
-  
+}
+</script>
+
+<style scoped>
+.v-app {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.v-main {
+  padding: 0; /* Убедитесь, что нет отступов */
+  height: 100%;
+  overflow: hidden;
+}
+</style>
