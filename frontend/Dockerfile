@@ -1,4 +1,4 @@
-FROM node:23.3 AS builder
+FROM node:23.3-alpine AS builder
 
 
 WORKDIR /app
@@ -9,12 +9,12 @@ COPY . .
 
 ARG BACKEND_HOST
 ARG BACKEND_PORT
-RUN echo BACKEND_HOST=${BACKEND_HOST} > ./.env
-RUN echo BACKEND_PORT=${BACKEND_PORT} >> ./.env
+ENV BACKEND_HOST=${BACKEND_HOST}
+ENV BACKEND_PORT=${BACKEND_PORT}
 
 RUN npm run generate
 
-FROM node:23.3
+FROM node:23.3-alpine
 
 WORKDIR /app
 COPY --from=builder --chown=node:node /app/package*.json ./
