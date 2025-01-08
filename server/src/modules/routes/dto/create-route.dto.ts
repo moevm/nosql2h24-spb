@@ -1,4 +1,4 @@
-import {IsString, IsNumber, MaxLength, MinLength} from "class-validator";
+import { IsString, MaxLength, MinLength, IsArray, ArrayNotEmpty } from "class-validator";
 
 export class CreateRouteDto {
     @IsString()
@@ -10,9 +10,7 @@ export class CreateRouteDto {
     @MaxLength(2000)
     description: string;
 
-    @IsNumber()
-    length: number;
-
-    @IsNumber()
-    duration: number;
+    @IsArray()
+    @ArrayNotEmpty()
+    poiList: string[];
 }

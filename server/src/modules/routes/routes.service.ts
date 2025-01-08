@@ -1,44 +1,31 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {CreateRouteDto} from "./dto/create-route.dto";
 import {Neo4jService} from "../neo4j/neo4j.service";
-import Route from "./entities/routes.entity";
+import Route from "./entities/route.entity";
 
 
 @Injectable()
 export class RoutesService {
-    // private static readonly FIND_INTERSECTION_RADIUS: number = 100000;
-
     constructor(private readonly neo4jService: Neo4jService) {
     }
 
-    async create(dto: CreateRouteDto) {
+    async build(poiList: number[]) {
         const session = this.neo4jService.getWriteSession();
         try {
-            // const result = await session.run(
-            //     `WITH point({latitude: ${dto.location.latitude}, longitude: ${dto.location.longitude}}) AS l
-            //     CALL (l) {        
-            //         MATCH (i: Intersection WHERE point.distance(i.location, l) < ${(PointsOfInterestService.FIND_INTERSECTION_RADIUS)}) 
-            //         RETURN i 
-            //         ORDER BY point.distance(i.location, l) ASC 
-            //         LIMIT 1
-            //     } 
-            //     WITH i, l
-            //     CREATE (poi :Route {
-            //         name: "${dto.name}",
-            //         description: "${dto.description}",
-            //         location: l,
-            //         created_at: Datetime()}
-            //         )-[r: CLOSE_TO_THE]->(i)
-            //     RETURN poi`);
-            // const node = result.records.at(0).get('poi');
-            // return new Route(
-            //     node.elementId,
-            //     node.properties.name,
-            //     node.properties.description,
-            //     node.properties.length,
-            //     node.properties.duration,
-            //     node.properties.created_at.toString()
-            // );
+            const result = await session.run(
+                `CALL () { 
+                    UNWIND $poi_list AS poi_id 
+                    MATCH(poi :PointOfInterest WHERE elementId(poi) = poi_id)-[:CLOSE_TO_THE]->(i :Intersection) 
+                    RETURN collect(DISTINCT i) AS i_list
+                }
+                WITH i_list[0..-1] AS i1, i_list[1..] AS i2
+                UNWIND apoc.coll.zip(i1, i2) AS segment
+                CALL apoc.algo.aStarConfig(segment[0], segment[1], "ROAD_SEGMENT", {pointPropName: "location", weight: "length"})
+                YIELD weight, path
+                RETURN weight AS length, path`, 
+                {poi_list: poiList}
+            );
+            return result.records.map(record => record.toObject());
         } finally {
             await session.close();
         }

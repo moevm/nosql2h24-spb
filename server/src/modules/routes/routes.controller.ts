@@ -1,28 +1,26 @@
-import {Body, Controller, Get, Param, Post, UsePipes, ValidationPipe} from '@nestjs/common';
-import {RoutesService} from './routes.service';
-import {CreateRouteDto} from "./dto/create-route.dto";
-import {Public} from "../authorization/public.decorator";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { RoutesService } from './routes.service';
+import { Public } from '../authorization/public.decorator';
 
-@Controller("/api/route")
+@Controller("/api/routes")
 export class RoutesController {
     constructor(private readonly RoutesService: RoutesService) {
     }
 
-    @UsePipes(new ValidationPipe())
-    @Post()
-    async create(@Body() createRoutesDto: CreateRouteDto) {
-        return await this.RoutesService.create(createRoutesDto);
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    @Post("build")
+    async build(@Body() poiList: number[]) {
+        return await this.RoutesService.build(poiList);
     }
 
-    @Public()
     @Get()
-    findAll() {
+    async findAll() {
         return this.RoutesService.findAll();
     }
 
-    @Public()
     @Get(':id')
-    findOne(@Param('id') id: string) {
+    async findOne(@Param('id') id: string) {
         return this.RoutesService.findOne(id);
     }
 }
