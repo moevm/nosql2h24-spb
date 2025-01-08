@@ -1,5 +1,4 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
-import {CreateRouteDto} from "./dto/create-route.dto";
 import {Neo4jService} from "../neo4j/neo4j.service";
 import Route from "./entities/route.entity";
 
