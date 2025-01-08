@@ -10,7 +10,27 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: ['vuetify-nuxt-module', undefined],
-  vuetify: {},
+  vuetify: {
+    vuetifyOptions: {
+      theme: {
+        themes: {
+          light: {
+            colors: {
+              background: '#FFFFFF',
+              primary: '#F5F5F5',
+              secondary: '#9FADBF',
+              soft: '#DEDEDF',
+              accent: '#9FADBF',
+              error: '#B65B5B',
+              info: '#2196F3',
+              success: '#4CAF50',
+              warning: '#FFC107'
+            }
+          }
+        }
+      }
+    }
+  },
   plugins: ['~/plugins/open-layers.ts'],
   // build: {
   //   transpile: ['ol/map, ol/View', 'ol/layer/Tile', 'ol/source', 'ol/source/OSM']

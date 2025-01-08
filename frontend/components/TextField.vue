@@ -5,9 +5,12 @@
     v-model="inputValue"
     @input="$emit('input', $event)"
     class="text-field"
+    color="secondary"
+    bg-color="background"
     variant="solo"
+    :rules="rules"
     elevation="4"
-    :messages="messages"
+    :error-messages="messages"
     >
     </v-text-field>
 </template>
@@ -70,11 +73,11 @@
         border-radius: 20px;
     }
     .text-field .v-messages {
-        color: #B65B5B; /* Устанавливаем цвет текста в красный */
+        /* color: #B65B5B; */
         font-size: 14px;
         margin-top: 4px;
     }
     .text-field .v-input__control .v-input__slot input {
-        font-size: 20px; /* Устанавливаем размер текста в поле ввода */
+        font-size: 20px;
     }
 </style>

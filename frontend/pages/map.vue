@@ -75,10 +75,16 @@ onMounted(() => {
 });
 
 const zoomIn = () => {
-  map.getView().setZoom(map.getView().getZoom() + 1);
+  map.getView().animate({
+    zoom: map.getView().getZoom() + 1,
+    duration: 200
+  });
 };
 const zoomOut = () => {
-  map.getView().setZoom(map.getView().getZoom() - 1);
+  map.getView().animate({
+    zoom: map.getView().getZoom() - 1,
+    duration: 200
+  });
 };
 
 const drawer = ref(false)

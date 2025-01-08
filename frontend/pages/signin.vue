@@ -1,27 +1,30 @@
 <template>
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
-      <v-card class="registration-card" color="background">
+      <v-card class="registration-card" color="primary">
         <v-card-title class="headline text-center d-flex justify-center text-h3 custom-margin">
           Авторизация
         </v-card-title>
         <v-card-text class="d-flex flex-column align-center">
-          <TextField label="Почта" v-model="email" :messages="emailMessages" />
-          <TextField label="Пароль" v-model="password" type="password" :messages="passwordMessages" />
-          <Btn label="Вход" class="custom-margin" @click="handleRegistration" />
-          <TextField
-            label="Почта"
-            v-model="email"
-            :messages="emailMessages"
-          />
-          <TextField
-            label="Пароль"
-            v-model="password"
-            type="password"
-            :messages="passwordMessages"
-          />
+          <v-form v-model="valid" validate-on="invalid-input" @submit.prevent="handleRegistration">
+            <TextField
+              label="Почта"
+              v-model="email"
+              @input="emailMessages = ''"
+              :messages="emailMessages"
+              :rules="[rules.required, rules.email]"
+            />
+            <TextField
+              label="Пароль"
+              v-model="password"
+              @input="passwordMessages = ''"
+              type="password"
+              :messages="passwordMessages"
+              :rules="[rules.required]"
+            />
 
-          <Btn label="Вход" class="custom-margin" @click="handleRegistration"/>
+            <Btn label="Вход" class="custom-margin" type="submit"/>
+          </v-form>
           <div style="display: inline; text-align: center;">
             В первый раз? <nuxt-link to="/signup">Зарегистрируйтесь!</nuxt-link>
           </div>
@@ -39,18 +42,22 @@ export default {
       email: '',
       password: '',
       emailMessages: '',
-      passwordMessages: ''
+      passwordMessages: '',
+      valid: false,
+      rules: {
+        required: value => !!value || 'Здесь пусто!',
+        email: value => {
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          return pattern.test(value) || 'Некорректный email'
+        }
+      }
     }
   },
   methods: {
     async handleRegistration() {
+      console.log('hi!!', this.valid)
+      if (!this.valid) return;
       const { email, password } = this;
-      const emailRegExp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-      if (!emailRegExp.test(email)) {
-        this.emailMessages = 'Некорректный email';
-        this.passwordMessages = '';
-        return;
-      }
       await $fetch(`${this.$config.public.backendUrl}/api/auth/signIn`, {
         method: 'POST',
         body: { email, password },
@@ -83,32 +90,6 @@ export default {
           }
         }
       })
-      // console.log(error, status)
-      // if (status.value === 200) {
-      //   console.log('Успешная авторизация');
-      //   localStorage.setItem('access_token', data.access_token);
-      //   this.password = '';
-      //   this.email = '';
-      //   this.passwordMessages = '';
-      //   this.emailMessages = '';
-      //   this.$router.push('/');
-      // }
-      // else {
-      //   console.error('Ошибка при отправке данных:', error);
-      //   if (status.value === 404) {
-      //     this.emailMessages = 'Пользователя с такой почтой не существует';
-      //     this.passwordMessages = '';
-      //   }
-      //   else if (status.value === 401) {
-      //     this.emailMessages = '';
-      //     this.passwordMessages = 'Неверный пароль';
-      //   }
-      //   else {
-      //     console.error('Что то пошло не так:', error);
-      //     this.passwordMessages = 'Что то пошло не так';
-      //     this.emailMessages = 'Что то пошло не так';          
-      //   }
-      // }
     }
   }
 }
@@ -116,7 +97,6 @@ export default {
 
 <style scoped>
 .registration-card {
-  background-color: primary;
   border-radius: 20px;
   padding: 27px;
 }

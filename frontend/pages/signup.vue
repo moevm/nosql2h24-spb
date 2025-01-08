@@ -1,15 +1,36 @@
 <template>
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
-      <v-card class="registration-card" color="background">
+      <v-card class="registration-card" color="primary">
         <v-card-title class="headline text-center d-flex justify-center text-h3 custom-margin">
           Регистрация
         </v-card-title>
         <v-card-text class="d-flex flex-column align-center">
-          <TextField label="Укажите почту" v-model="email" :messages="emailMessages" />
-          <TextField label="Придумайте пароль" v-model="password" type="password" :messages="passwordMessages" />
-          <TextField label="Укажите Имя" v-model="name" :messages="nameMessages" />
-          <Btn label="Зарегистрироваться" class="custom-margin" @click="handleRegistration" />
+          <v-form v-model="valid" validate-on="invalid-input" @submit.prevent="handleRegistration">
+            <TextField
+              label="Укажите почту"
+              v-model="email"
+              @input="emailMessages = ''"
+              :messages="emailMessages"
+              :rules="[rules.required, rules.email]"
+            />
+            <TextField
+              label="Придумайте пароль"
+              v-model="password"
+              @input="passwordMessages = ''"
+              type="password"
+              :messages="passwordMessages"
+              :rules="[rules.required, rules.minPassword]"
+            />
+            <TextField
+              label="Укажите Имя"
+              v-model="name"
+              @input="nameMessages = ''"
+              :messages="nameMessages"
+              :rules="[rules.required, rules.minName]"
+            />
+            <Btn label="Зарегистрироваться" class="custom-margin" @click="handleRegistration" />
+          </v-form>
           <div style="display: inline; text-align: center;">
             Уже Зарегистрированы? <nuxt-link to="/signin">Войдите!</nuxt-link>
           </div>
@@ -29,34 +50,23 @@ export default {
       name: '',
       emailMessages: '',
       passwordMessages: '',
-      nameMessages: ''
+      nameMessages: '',
+      valid: false,
+      rules: {
+        required: value => !!value || 'Здесь пусто!',
+        email: value => {
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          return pattern.test(value) || 'Некорректный email'
+        },
+        minPassword: value => value.length >= 6 || 'Пароль должен содержать не менее 6 символов',
+        minName: value => value.length >= 4 || 'Имя должно содержать не менее 4 символов'
+      }
     }
   },
   methods: {
     async handleRegistration() {
+      if (!this.valid) return;
       const { email, password, name } = this;
-      const emailRegExp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
-      if (!emailRegExp.test(email)) {
-        this.emailMessages = 'Некорректный email';
-        this.passwordMessages = '';
-        this.nameMessages = '';
-        return;
-      }
-
-      if (password.length < 6) {
-        this.passwordMessages = 'Пароль должен содержать не менее 6 символов';
-        this.emailMessages = '';
-        this.nameMessages = '';
-        return;
-      }
-
-      if (name.length < 4) {
-        this.nameMessages = 'Имя должно содержать не менее 4 символов';
-        this.emailMessages = '';
-        this.passwordMessages = '';
-        return;
-      }
       console.log('send reg req');
       $fetch(`${this.$config.public.backendUrl}/api/auth/signUp`, {
         method: 'POST',
