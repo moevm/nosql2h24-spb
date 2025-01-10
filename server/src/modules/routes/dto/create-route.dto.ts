@@ -1,4 +1,4 @@
-import { IsString, MaxLength, MinLength, IsArray, ArrayNotEmpty } from "class-validator";
+import { IsString, MaxLength, MinLength, IsArray, ArrayMinSize } from "class-validator";
 
 export class CreateRouteDto {
     @IsString()
@@ -11,6 +11,6 @@ export class CreateRouteDto {
     description: string;
 
     @IsArray()
-    @ArrayNotEmpty()
-    poiList: string[];
+    @ArrayMinSize(2)
+    points: string[];
 }
