@@ -6,6 +6,7 @@ import {Neo4jConfig} from './modules/neo4j/neo4j-config.interface';
 import {PointsOfInterestModule} from './modules/points-of-interest/points-of-interest.module';
 import {UsersModule} from "./modules/users/users.module";
 import {AuthorizationModule} from "./modules/authorization/authorization.module";
+import { RoutesModule } from './modules/routes/routes.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import {AuthorizationModule} from "./modules/authorization/authorization.module"
         PointsOfInterestModule,
         UsersModule,
         AuthorizationModule,
+        RoutesModule
     ],
     controllers: [AppController],
     providers: [],

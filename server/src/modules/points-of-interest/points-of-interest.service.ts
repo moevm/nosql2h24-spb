@@ -1,6 +1,6 @@
-import {Injectable, NotFoundException} from "@nestjs/common";
-import {CreatePointOfInterestDto} from "./dto/create-point-of-interest.dto";
-import {Neo4jService} from "../neo4j/neo4j.service";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { CreatePointOfInterestDto } from "./dto/create-point-of-interest.dto";
+import { Neo4jService } from "../neo4j/neo4j.service";
 import PointOfInterest from "./entities/point-of-interest.entity";
 
 
@@ -29,7 +29,8 @@ export class PointsOfInterestService {
                     location: l,
                     created_at: Datetime()}
                     )-[r: CLOSE_TO_THE]->(i)
-                RETURN poi`);
+                RETURN poi`
+            );
             const node = result.records.at(0).get('poi');
             return new PointOfInterest(
                 node.elementId,
