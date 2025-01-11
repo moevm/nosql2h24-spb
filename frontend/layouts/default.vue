@@ -2,7 +2,7 @@
   <v-app dark>
     <Bar />
     <v-main>
-      <v-container>
+      <v-container class="h-100">
         <slot />
       </v-container>
     </v-main>
@@ -12,7 +12,7 @@
 <script>
 export default {
   name: 'DefaultLayout',
-  data () {
+  data() {
     return {
       clipped: false,
       drawer: false,
@@ -41,13 +41,13 @@ export default {
 
 
 <style scoped>
-  #app {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    background-image: url("~/assets/background.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-image: url("~/assets/background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 </style>

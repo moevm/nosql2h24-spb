@@ -1,31 +1,22 @@
 <template>
-  <v-row justify="center" align="center">
+  <v-row justify="center" align="center" class="h-100 pb-16">
     <v-col cols="12" sm="8" md="6">
-      <v-card class="registration-card" color="primary">
-        <v-card-title class="headline text-center d-flex justify-center text-h3 custom-margin">
+      <v-card class="rounded-xl" color="primary">
+        <v-card-title class="headline text-center d-flex justify-center text-h3 mb-7">
           Авторизация
         </v-card-title>
         <v-card-text class="d-flex flex-column align-center">
-          <v-form v-model="valid" validate-on="invalid-input" @submit.prevent="handleRegistration">
-            <TextField
-              label="Почта"
-              v-model="email"
-              @input="emailMessages = ''"
-              :messages="emailMessages"
-              :rules="[rules.required, rules.email]"
-            />
-            <TextField
-              label="Пароль"
-              v-model="password"
-              @input="passwordMessages = ''"
-              type="password"
-              :messages="passwordMessages"
-              :rules="[rules.required]"
-            />
+          <v-col cols="12" sm="10" xl="8">
+            <v-form v-model="valid" validate-on="invalid-input" @submit.prevent="handleRegistration" class="w-100">
+              <TextField label="Почта" v-model="email" @input="emailMessages = ''" :messages="emailMessages"
+                :rules="[rules.required, rules.email]" class="my-1" />
+              <TextField label="Пароль" v-model="password" @input="passwordMessages = ''" type="password"
+                :messages="passwordMessages" :rules="[rules.required]" class="my-1" />
 
-            <Btn label="Вход" class="custom-margin" type="submit"/>
-          </v-form>
-          <div style="display: inline; text-align: center;">
+              <Btn label="Вход" class="mb-7" type="submit" block />
+            </v-form>
+          </v-col>
+          <div class="text-center">
             В первый раз? <nuxt-link to="/signup">Зарегистрируйтесь!</nuxt-link>
           </div>
         </v-card-text>
@@ -62,7 +53,7 @@ export default {
         method: 'POST',
         body: { email, password },
         onResponse: ({ request, response, options }) => {
-          console.log('asdasd',response);
+          console.log('asdasd', response);
           if (response.status === 200) {
             console.log('Успешная авторизация', request);
             this.password = '';
@@ -85,7 +76,7 @@ export default {
             else {
               console.error('Что то пошло не так:', response.statusText);
               this.passwordMessages = 'Что то пошло не так';
-              this.emailMessages = 'Что то пошло не так';          
+              this.emailMessages = 'Что то пошло не так';
             }
           }
         }
@@ -94,15 +85,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.registration-card {
-  border-radius: 20px;
-  padding: 27px;
-}
-
-.custom-margin {
-  margin-top: 0;
-  margin-bottom: 28px;
-}
-</style>

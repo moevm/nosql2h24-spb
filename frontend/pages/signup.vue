@@ -1,37 +1,23 @@
 <template>
-  <v-row justify="center" align="center">
+  <v-row justify="center" align="center" class="h-100 pb-16">
     <v-col cols="12" sm="8" md="6">
-      <v-card class="registration-card" color="primary">
-        <v-card-title class="headline text-center d-flex justify-center text-h3 custom-margin">
+      <v-card class="rounded-xl" color="primary">
+        <v-card-title class="headline text-center d-flex justify-center text-h3 mb-7">
           Регистрация
         </v-card-title>
         <v-card-text class="d-flex flex-column align-center">
-          <v-form v-model="valid" validate-on="invalid-input" @submit.prevent="handleRegistration">
-            <TextField
-              label="Укажите почту"
-              v-model="email"
-              @input="emailMessages = ''"
-              :messages="emailMessages"
-              :rules="[rules.required, rules.email]"
-            />
-            <TextField
-              label="Придумайте пароль"
-              v-model="password"
-              @input="passwordMessages = ''"
-              type="password"
-              :messages="passwordMessages"
-              :rules="[rules.required, rules.minPassword]"
-            />
-            <TextField
-              label="Укажите Имя"
-              v-model="name"
-              @input="nameMessages = ''"
-              :messages="nameMessages"
-              :rules="[rules.required, rules.minName]"
-            />
-            <Btn label="Зарегистрироваться" class="custom-margin" @click="handleRegistration" />
-          </v-form>
-          <div style="display: inline; text-align: center;">
+          <v-col cols="12" sm="10" xl="8">
+            <v-form v-model="valid" validate-on="invalid-input" @submit.prevent="handleRegistration" class="w-100">
+              <TextField label="Укажите почту" v-model="email" @input="emailMessages = ''" :messages="emailMessages"
+                :rules="[rules.required, rules.email]" class="my-1" />
+              <TextField label="Придумайте пароль" v-model="password" @input="passwordMessages = ''" type="password"
+                :messages="passwordMessages" :rules="[rules.required, rules.minPassword]" class="my-1" />
+              <TextField label="Укажите Имя" v-model="name" @input="nameMessages = ''" :messages="nameMessages"
+                :rules="[rules.required, rules.minName]" class="my-1" />
+              <Btn label="Зарегистрироваться" class="mb-7" @click="handleRegistration" block />
+            </v-form>
+          </v-col>
+          <div class="text-center">
             Уже Зарегистрированы? <nuxt-link to="/signin">Войдите!</nuxt-link>
           </div>
         </v-card-text>
