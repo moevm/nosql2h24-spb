@@ -1,7 +1,7 @@
-import {Body, Controller, Get, Param, Post, UsePipes, ValidationPipe} from '@nestjs/common';
-import {PointsOfInterestService} from './points-of-interest.service';
-import {CreatePointOfInterestDto} from "./dto/create-point-of-interest.dto";
-import {Public} from "../authorization/public.decorator";
+import { Body, Controller, Get, Param, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { PointsOfInterestService } from './points-of-interest.service';
+import { CreatePointOfInterestDto } from "./dto/create-point-of-interest.dto";
+import { Public } from "../authorization/public.decorator";
 
 @Controller("/api/poi")
 export class PointsOfInterestController {
@@ -16,13 +16,13 @@ export class PointsOfInterestController {
 
     @Public()
     @Get()
-    findAll() {
+    async findAll() {
         return this.pointsOfInterestService.findAll();
     }
 
     @Public()
     @Get(':id')
-    findOne(@Param('id') id: string) {
+    async findOne(@Param('id') id: string) {
         return this.pointsOfInterestService.findOne(id);
     }
 }

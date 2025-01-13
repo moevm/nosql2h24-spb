@@ -47,13 +47,13 @@ export class RoutesService {
                 CALL () {
                     MATCH 
                     (route)-[inc1: INCLUDE]->
-                    (: PointOfInterest)-[:CLOSE_TO_THE]->(i1: Intersection),
+                    (:PointOfInterest)-[:CLOSE_TO_THE]->(i1: Intersection),
                     (route)-[inc2: INCLUDE{order: inc1.order + 1}]->
-                    (: PointOfInterest)-[:CLOSE_TO_THE]->(i2: Intersection)
+                    (:PointOfInterest)-[:CLOSE_TO_THE]->(i2: Intersection)
                     RETURN i1, i2
                     ORDER BY inc1.order
                 }
-                WITH route, i1, i2
+                WITH DISTINCT route, i1, i2
                 CALL apoc.algo.aStarConfig(i1, i2, "ROAD_SEGMENT", {pointPropName: "location", weight: "length"})  
                 YIELD weight
                 WITH SUM(weight) as total_distance, route
@@ -144,7 +144,6 @@ export class RoutesService {
                 RETURN route, collect(poi) AS poi_list
                 `
             )
-            console.log(result.records)
             const node = result.records.at(0)?.get('route');
             const poiList: PointOfInterest[] = result.records.at(0)?.get('poi_list').map(poi => new PointOfInterest(
                 poi.elementId,
@@ -170,4 +169,18 @@ export class RoutesService {
         }
     }
 
+    async delete(id: string, userId: string) {
+        const session = this.neo4jService.getWriteSession();
+        try {
+            await session.run(`
+                MATCH (user: User WHERE elementId(user) = $userId), 
+                (author: User)-[:CREATED]->(route :Route WHERE elementId(route) = $routeId) 
+                DETACH DELETE CASE elementId(user) = elementId(author) OR user.role = 'ADMIN' WHEN true THEN route END
+                `,
+                { routeId: id, userId: userId }
+            );
+        } finally {
+            await session.close();
+        }
+    }
 }
