@@ -36,6 +36,7 @@ export class PointsOfInterestService {
                 node.elementId,
                 node.properties.name,
                 node.properties.description,
+                node.properties.images,
                 node.properties.location,
                 node.properties.created_at.toString(),
             );
@@ -56,6 +57,7 @@ export class PointsOfInterestService {
                     node.elementId,
                     node.properties.name,
                     node.properties.description,
+                    node.properties.images,
                     node.properties.location,
                     node.properties.created_at.toString()
                 );
@@ -79,6 +81,7 @@ export class PointsOfInterestService {
                 node.elementId,
                 node.properties.name,
                 node.properties.description,
+                node.properties.images,
                 node.properties.location,
                 node.properties.created_at.toString(),
             );

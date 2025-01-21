@@ -112,6 +112,7 @@ export class RoutesService {
                     poi.elementId,
                     poi.properties.name,
                     poi.properties.description,
+                    poi.properties.images,
                     poi.properties.location,
                     poi.properties.created_at.toString(),
                 ));
@@ -149,6 +150,7 @@ export class RoutesService {
                 poi.elementId,
                 poi.properties.name,
                 poi.properties.description,
+                poi.properties.images,
                 poi.properties.location,
                 poi.properties.created_at.toString(),
             ));
