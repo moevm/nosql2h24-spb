@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreatePointOfInterestDto } from "./dto/create-point-of-interest.dto";
 import { Neo4jService } from "../neo4j/neo4j.service";
 import PointOfInterest from "./entities/point-of-interest.entity";
+import { log } from "console";
 
 
 @Injectable()
@@ -45,12 +46,15 @@ export class PointsOfInterestService {
         }
     }
 
-    async findAll() {
+    async findAll(query: string) {
         const session = this.neo4jService.getReadSession();
         try {
             const result = await session.run(
-                `MATCH (poi :PointOfInterest) RETURN poi`
-            )
+                `MATCH (poi :PointOfInterest) 
+                WHERE poi.name =~ '.*(?ui)${query ?? ''}.*'
+                RETURN poi`
+            );
+
             return result.records.map(record => {
                 const node = record.get('poi');
                 return new PointOfInterest(
