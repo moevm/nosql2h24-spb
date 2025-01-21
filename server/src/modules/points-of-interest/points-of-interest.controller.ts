@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PointsOfInterestService } from './points-of-interest.service';
 import { CreatePointOfInterestDto } from "./dto/create-point-of-interest.dto";
 import { Public } from "../authorization/public.decorator";
+import { query } from 'express';
 
 @Controller("/api/poi")
 export class PointsOfInterestController {
@@ -16,8 +17,8 @@ export class PointsOfInterestController {
 
     @Public()
     @Get()
-    async findAll() {
-        return this.pointsOfInterestService.findAll();
+    async findAll(@Query('search') query: string) {
+        return this.pointsOfInterestService.findAll(query);
     }
 
     @Public()
