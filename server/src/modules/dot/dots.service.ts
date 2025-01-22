@@ -74,7 +74,7 @@ export class DotsService {
             return new Dot(
                 node.elementId,
                 node.properties.location,
-                node.properties.dot.toString(),
+                node.properties.time.toString(),
             );
         } finally {
             await session.close();

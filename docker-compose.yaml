@@ -33,6 +33,7 @@ services:
     restart: always
     volumes:
       - db-data:/data
+      - ./db:/db
     networks:
       - nosql-spb-net
     healthcheck:
