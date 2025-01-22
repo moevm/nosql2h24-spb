@@ -1,0 +1,9 @@
+При наличие .cypher файлов
+
+sudo docker exec -it 4e841fa10335 cypher-shell -u neo4j -p password -f /data_base/init_intersectionss.cypher
+sudo docker exec -it 4e841fa10335 cypher-shell -u neo4j -p password -f /data_base/init_road_segments.cypher
+
+При наличие .csv файлов
+
+sudo docker exec -it 4e841fa10335 cypher-shell -u neo4j -p password -f /data_base/init_intersectionss.cypher
+sudo docker exec -it 4e841fa10335 cypher-shell -u neo4j -p password -f /data_base/init_road_segments.cypher
