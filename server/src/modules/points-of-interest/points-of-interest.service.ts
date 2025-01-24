@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreatePointOfInterestDto } from "./dto/create-point-of-interest.dto";
 import { Neo4jService } from "../neo4j/neo4j.service";
 import PointOfInterest from "./entities/point-of-interest.entity";
-import { log } from "console";
 
 
 @Injectable()
@@ -25,10 +24,10 @@ export class PointsOfInterestService {
                 } 
                 WITH i, l
                 CREATE (poi :PointOfInterest {
-                    name: "${dto.name}",
-                    description: "${dto.description}",
-                    location: l,
-                    created_at: Datetime()}
+                    poi_name: "${dto.name}",
+                    poi_description: "${dto.description}",
+                    poi_location: l,
+                    poi_created_at: Datetime()}
                     )-[r: CLOSE_TO_THE]->(i)
                 RETURN poi`
             );
@@ -46,24 +45,24 @@ export class PointsOfInterestService {
         }
     }
 
-    async findAll(query: string) {
+    async findAll(query?: string) {
         const session = this.neo4jService.getReadSession();
         try {
             const result = await session.run(
                 `MATCH (poi :PointOfInterest) 
-                WHERE poi.name =~ '.*(?ui)${query ?? ''}.*'
+                WHERE poi.poi_name =~ '.*(?ui)${query ?? ''}.*'
                 RETURN poi`
             );
-
+            
             return result.records.map(record => {
                 const node = record.get('poi');
                 return new PointOfInterest(
                     node.elementId,
-                    node.properties.name,
-                    node.properties.description,
-                    node.properties.images,
-                    node.properties.location,
-                    node.properties.created_at.toString()
+                    node.properties.poi_name,
+                    node.properties.poi_description,
+                    node.properties.poi_images,
+                    node.properties.poi_location,
+                    node.properties.poi_created_at.toString()
                 );
             });
         } finally {
@@ -83,11 +82,11 @@ export class PointsOfInterestService {
             }
             return new PointOfInterest(
                 node.elementId,
-                node.properties.name,
-                node.properties.description,
-                node.properties.images,
-                node.properties.location,
-                node.properties.created_at.toString(),
+                node.properties.poi_name,
+                node.properties.poi_description,
+                node.properties.poi_images,
+                node.properties.poi_location,
+                node.properties.poi_created_at.toString(),
             );
         } finally {
             await session.close();
