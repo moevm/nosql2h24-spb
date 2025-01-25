@@ -1,7 +1,7 @@
 import osmnx as ox
 import neo4j
 
-G = ox.graph_from_place("Аптекарский остров", network_type="walk", simplify=False)
+G = ox.graph_from_place("Санкт-Петербург", network_type="walk", simplify=False)
 # fig, ax = ox.plot_graph(G)
 
 gdf_nodes, gdf_relationships = ox.graph_to_gdfs(G)
@@ -16,16 +16,15 @@ driver = neo4j.GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)
 
 constraint_query = "CREATE CONSTRAINT IF NOT EXISTS FOR (i:Intersection) REQUIRE i.osmid IS UNIQUE"
 
-rel_index_query = "CREATE INDEX IF NOT EXISTS FOR ()-[r:ROAD_SEGMENT]-() ON r.osmids"
+rel_index_query = "CREATE INDEX IF NOT EXISTS FOR ()-[r:ROAD_SEGMENT]-() ON r.road_osmid"
 
-point_index_query = "CREATE POINT INDEX IF NOT EXISTS FOR (i:Intersection) ON i.location"
+point_index_query = "CREATE POINT INDEX IF NOT EXISTS FOR (i:Intersection) ON i.intersection_location"
 
-node_query = '''
+node_query = '''    
     UNWIND $rows AS row
     WITH row WHERE row.osmid IS NOT NULL
     MERGE (i:Intersection {osmid: row.osmid})
-        SET i.location = point({latitude: row.y, longitude: row.x }),
-            i.highway = row.highway,
+        SET i.intersection_location = point({latitude: row.y, longitude: row.x }),
             i.street_count = toInteger(row.street_count)
     RETURN COUNT(*) as total
     '''
@@ -34,12 +33,12 @@ rels_query = '''
     UNWIND $rows AS road
     MATCH (u:Intersection {osmid: road.u})
     MATCH (v:Intersection {osmid: road.v})
-    MERGE (u)-[r:ROAD_SEGMENT {osmid: road.osmid}]->(v)
+    MERGE (u)-[r:ROAD_SEGMENT {road_osmid: road.osmid}]->(v)
         SET r.oneway = road.oneway,
             r.lanes = road.lanes,
-            r.name = road.name,
-            r.highway = road.highway,
-            r.length = toFloat(road.length)
+            r.road_name = road.name,
+            r.road_highway = road.highway,
+            r.road_length = toFloat(road.length)        
     RETURN COUNT(*) AS total
     '''
 
@@ -47,5 +46,25 @@ driver.execute_query(constraint_query)
 driver.execute_query(rel_index_query)
 driver.execute_query(point_index_query)
 
-driver.execute_query(node_query, {'rows': gdf_nodes.loc[:, gdf_nodes.columns != 'geometry'].to_dict('records')})
-driver.execute_query(rels_query, {'rows': gdf_relationships.loc[:, gdf_relationships.columns != 'geometry'].to_dict('records')})
+
+nodes = gdf_nodes.loc[:, gdf_nodes.columns != 'geometry'].to_dict('records')
+
+BATCH_SIZE = 2000
+
+iter_num = len(nodes) // BATCH_SIZE + 1
+for i in range(iter_num):
+    print(i)
+    l = BATCH_SIZE * i
+    r = BATCH_SIZE * (i + 1)
+    driver.execute_query(node_query, {'rows': nodes[l: r]})
+
+del nodes
+
+rels = gdf_relationships.loc[:, gdf_relationships.columns != 'geometry'].to_dict('records')
+iter_num = len(rels) // BATCH_SIZE + 1
+print(f'rels len:{len(rels)}')
+for i in range(iter_num):
+    print(i)
+    l = BATCH_SIZE * i
+    r = BATCH_SIZE * (i + 1)
+    driver.execute_query(rels_query, {'rows': rels[l:r]})

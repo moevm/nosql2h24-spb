@@ -1,2 +1,4 @@
-./data.json
-./errors.json
+data.json
+errors.json
+cache/
+.idea/
