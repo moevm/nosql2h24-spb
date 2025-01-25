@@ -86,6 +86,26 @@ export class Neo4jService implements OnApplicationShutdown, OnModuleInit {
                     poi_created_at: Datetime(row.poi_created_at)
                 })-[r: CLOSE_TO_THE]->(i)
             `);
+
+            await session.run(`
+                LOAD CSV WITH HEADERS FROM 'file:///routes.csv' AS row
+                WITH row, apoc.convert.fromJsonList(row.points) AS points
+                UNWIND points AS point
+                MATCH (user: User{email:row.author_email})
+                MERGE (user)-[:CREATED]->(route :Route {route_name: row.name})
+                SET  route.route_description= row.description,
+                    route.route_created_at= row.created_at,
+                    route.route_length= row.length,
+                    route.route_duration= row.duration
+                WITH route, collect(point({latitude: point.lat, longitude: point.lon})) AS points
+                UNWIND points AS l
+                OPTIONAL MATCH (poi :PointOfInterest WHERE poi.poi_location = l)
+                WITH DISTINCT route, poi, RANGE(0, SIZE(points) - 1) AS order_list
+                WITH collect(poi) AS points, order_list, route
+                UNWIND apoc.coll.zip(points, order_list) AS poi
+                WITH poi[0] AS val, poi[1] AS i, route
+                MERGE (route)-[:INCLUDE{order: i}]->(val)
+            `);
         } finally {
             session.close();
         }
