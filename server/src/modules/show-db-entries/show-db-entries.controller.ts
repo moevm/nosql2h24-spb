@@ -19,7 +19,7 @@ export class ShowDbEntriesController {
     constructor(private readonly showDbEntriesService: ShowDbEntriesService) {
     }
 
-    @Get(path: '/data-base')
+    @Get('/data-base')
     async getShowInfo() {
         return this.showDbEntriesService.getAllDataBase();
     }
