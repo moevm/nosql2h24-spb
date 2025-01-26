@@ -58,6 +58,7 @@
       <v-btn
         icon
         class="mx-7"
+        to="statistics"
       >
       <img src="~/assets/icons/bar-chart.svg" />
       </v-btn>
