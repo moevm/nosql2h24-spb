@@ -18,8 +18,8 @@ export class Neo4jErrorFilter implements ExceptionFilter {
         if (exception.message.includes('already exists with')) {
             const [_, property] = exception.message.match(/`([a-z0-9]+)`/gi);
             message = [`${property.replace(/`/g, '')} already taken`];
-            statusCode = 400;
-            error = 'Bad Request';
+            statusCode = 409;
+            error = 'Conflict';
         }
 
         // Neo.ClientError.Procedure.ProcedureCallFailed
