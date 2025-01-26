@@ -3,6 +3,7 @@ import { Neo4jService } from "../neo4j/neo4j.service";
 import Route from "./entities/route.entity";
 import { CreateRouteDto } from "./dto/create-route.dto";
 import PointOfInterest from "../points-of-interest/entities/point-of-interest.entity";
+import { User } from "../users/entities/user.entity";
 
 
 @Injectable()
@@ -103,17 +104,18 @@ export class RoutesService {
         const session = this.neo4jService.getReadSession();
         try {
             const result = await session.run(`
-                MATCH (route :Route) 
+                MATCH (user:User)-[:CREATED]->(route:Route)
                 CALL (route) {
                     MATCH (route)-[inc :INCLUDE]->(poi :PointOfInterest)
                     RETURN poi
                     ORDER BY inc.order
                 }
-                RETURN route, collect(poi) AS poi_list
+                RETURN route, user, collect(poi) AS poi_list
                 `
             )
             return result.records.map(record => {
                 const node = record.get('route');
+
                 const poiList: PointOfInterest[] = record.get('poi_list').map(poi => new PointOfInterest(
                     poi.elementId,
                     poi.properties.poi_name,
@@ -122,6 +124,15 @@ export class RoutesService {
                     poi.properties.poi_location,
                     poi.properties.poi_created_at.toString(),
                 ));
+                const userNode = record.get('user');
+                const user = new User(
+                    userNode.elementId,
+                    userNode.properties.name,
+                    userNode.properties.email,
+                    undefined,
+                    userNode.properties.role,
+                    userNode.properties.created_at.toString()
+                );
                 return new Route(
                     node.elementId,
                     node.properties.route_name,
@@ -129,7 +140,8 @@ export class RoutesService {
                     node.properties.route_length,
                     node.properties.route_duration,
                     node.properties.route_created_at.toString(),
-                    poiList
+                    poiList,
+                    user
                 );
             });
         } finally {
@@ -142,16 +154,28 @@ export class RoutesService {
         try {
             const result = await session.run(
                 `
-                MATCH (route :Route WHERE elementId(route) = "${id}") 
+                MATCH (user)-[:CREATED]->(route :Route WHERE elementId(route) = "${id}") 
                 CALL (route) {
                     MATCH (route)-[inc :INCLUDE]->(poi :PointOfInterest)
                     RETURN poi
                     ORDER BY inc.order
                 }
-                RETURN route, collect(poi) AS poi_list
+                RETURN route, user, collect(poi) AS poi_list
                 `
             )
             const node = result.records.at(0)?.get('route');
+            if (!node) {
+                throw new NotFoundException(`Route with id: ${id} not found`);
+            }
+            const userNode = result.records.at(0)?.get('user');
+            const user = new User(
+                userNode.elementId,
+                userNode.properties.name,
+                userNode.properties.email,
+                userNode.properties.password,
+                userNode.properties.role,
+                userNode.properties.created_at.toString()
+            );
             const poiList: PointOfInterest[] = result.records.at(0)?.get('poi_list').map(poi => new PointOfInterest(
                 poi.elementId,
                 poi.properties.poi_name,
@@ -160,9 +184,6 @@ export class RoutesService {
                 poi.properties.poi_location,
                 poi.properties.poi_created_at.toString(),
             ));
-            if (!node) {
-                throw new NotFoundException(`Route with id: ${id} not found`);
-            }
             return new Route(
                 node.elementId,
                 node.properties.route_name,
@@ -170,7 +191,8 @@ export class RoutesService {
                 node.properties.route_length,
                 node.properties.route_duration,
                 node.properties.route_created_at.toString(),
-                poiList
+                poiList,
+                user
             );
         } finally {
             await session.close();

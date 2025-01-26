@@ -6,18 +6,9 @@
           Авторизация
         </v-card-title>
         <v-card-text class="d-flex flex-column align-center">
-          <TextField
-            label="Почта"
-            v-model="email"
-            :messages="emailMessages"
-          />
-          <TextField
-            label="Пароль"
-            v-model="password"
-            type="password"
-            :messages="passwordMessages"
-          />
-          <Btn label="Вход" class="custom-margin" @click="handleRegistration"/>
+          <TextField label="Почта" v-model="email" :messages="emailMessages" />
+          <TextField label="Пароль" v-model="password" type="password" :messages="passwordMessages" />
+          <Btn label="Вход" class="custom-margin" @click="handleRegistration" />
           <div style="display: inline; text-align: center;">
             В первый раз? <nuxt-link to="/signup">Зарегистрируйтесь!</nuxt-link>
           </div>
@@ -71,7 +62,7 @@ export default {
         else {
           console.error('Что то пошло не так:', error, response);
           this.passwordMessages = 'Что то пошло не так';
-          this.emailMessages = 'Что то пошло не так';          
+          this.emailMessages = 'Что то пошло не так';
         }
       }
     }
