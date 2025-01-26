@@ -1,6 +1,5 @@
 # nosql_template
 
-
 ## Предварительная проверка заданий
 
 <a href=" ./../../../actions/workflows/1_helloworld.yml" >![1. Согласована и сформулирована тема курсовой]( ./../../actions/workflows/1_helloworld.yml/badge.svg)</a>
@@ -16,3 +15,9 @@
 <a href=" ./../../../actions/workflows/6_report.yml" >![6. Пояснительная записка]( ./../../actions/workflows/6_report.yml/badge.svg)</a>
 
 <a href=" ./../../../actions/workflows/7_app_is_ready.yml" >![7. App is ready]( ./../../actions/workflows/7_app_is_ready.yml/badge.svg)</a>
+
+## Данные для авторизации
+| Роль           | Логин             | Пароль  |
+|-----------------|-------------------|---------|
+| **Администратор** | admin@example.com   | password   |
+| **Обычный пользователь** | user@example.com | password  |

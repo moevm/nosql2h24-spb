@@ -1,23 +1,12 @@
-import {Injectable, NotFoundException, OnApplicationBootstrap} from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import {CreateUserDto} from './dto/create-user.dto';
 import {Neo4jService} from "../neo4j/neo4j.service";
 import {User} from "./entities/user.entity";
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UsersService implements OnApplicationBootstrap {
+export class UsersService {
     constructor(private readonly neo4jService: Neo4jService) {
-    }
-
-    async onApplicationBootstrap() {
-        const session = this.neo4jService.getWriteSession();
-        try {
-            await session.run("CREATE CONSTRAINT user_email IF NOT EXISTS FOR (user :User) REQUIRE user.email IS UNIQUE");
-            await this.create({name: "admin", email: "admin@example.com", password: "password", role: "ADMIN"});
-            await this.create({name: "user", email: "user@example.com", password: "password", role: "USER"});
-        } finally {
-            await session.close()
-        }
     }
 
     async create(createUserDto: CreateUserDto) {

@@ -1,0 +1,3 @@
+"_id","_labels","created_at","email","name","password","role","_start","_end","_type"
+"724563",":User","2025-01-24T11:57:37.512Z","admin@example.com","admin","$2b$10$itZ/tUU7lX.woks/sT.CEu.hILZoD9IcyVxy6fkhcc.AuNI3Sgz/y","ADMIN",,,
+"724564",":User","2025-01-24T11:57:37.670Z","user@example.com","user","$2b$10$WRlTRDeLzHAOrVuwJ25xCuRym5H2kKG.bvBcWtdazutE8yJgcCVfi","USER",,,
