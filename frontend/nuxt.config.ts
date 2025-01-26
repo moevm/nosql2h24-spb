@@ -20,7 +20,7 @@ export default defineNuxtConfig({
               primary: '#F5F5F5',
               secondary: '#9FADBF',
               soft: '#DEDEDF',
-              accent: '#9FADBF',
+              accent: '#5D807A',
               error: '#B65B5B',
               info: '#2196F3',
               success: '#4CAF50',
@@ -31,7 +31,7 @@ export default defineNuxtConfig({
       }
     }
   },
-  plugins: ['~/plugins/open-layers.ts'],
+  plugins: ['~/plugins/open-layers.ts', '~/plugins/vue-draggable.client.ts'],
   // build: {
   //   transpile: ['ol/map, ol/View', 'ol/layer/Tile', 'ol/source', 'ol/source/OSM']
   // }
