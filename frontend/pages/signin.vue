@@ -40,6 +40,7 @@ export default {
       }
       const response = await this.$axios.post('/api/auth/signIn', { email, password });
       localStorage.setItem('access_token', response.data.access_token);
+      localStorage.setItem('user_id', response.data.user.id)
       console.log(response);
       if (response.status === 200) {
         console.log('Успешная авторизация');

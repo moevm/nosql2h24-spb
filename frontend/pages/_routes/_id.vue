@@ -104,6 +104,7 @@ export default {
     } catch (e) {
       if (e.response.status == 401) {
         localStorage.removeItem('access_token')
+        localStorage.removeItem('user_id')
         redirect('/signin')
       }
     }

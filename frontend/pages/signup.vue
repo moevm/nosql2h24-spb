@@ -75,6 +75,7 @@ export default {
         console.log('send reg req');
         const response = await this.$axios.post('/api/auth/signUp', { email, password, name });
         localStorage.setItem('access_token', response.data.access_token);
+        localStorage.getItem('user_id', response.data.user.id)
 
         if (response.status === 201) {
           console.log('Успешная регистрация');
