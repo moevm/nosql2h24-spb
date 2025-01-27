@@ -95,8 +95,8 @@ export class Neo4jService implements OnApplicationShutdown, OnModuleInit {
                 MERGE (user)-[:CREATED]->(route :Route {route_name: row.name})
                 SET  route.route_description= row.description,
                     route.route_created_at= row.created_at,
-                    route.route_length = row.route_length,
-                    route.route_duration = row.route_duration
+                    route.route_length = toFloat(row.route_length),
+                    route.route_duration = toFloat(row.route_duration)
                 WITH route, collect(point({latitude: point.lat, longitude: point.lon})) AS points
                 UNWIND points AS l
                 OPTIONAL MATCH (poi :PointOfInterest WHERE poi.poi_location = l)
