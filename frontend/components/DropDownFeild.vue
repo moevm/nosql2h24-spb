@@ -28,7 +28,7 @@
       return { 
         isOpen: false, 
         selectedItem: null, 
-        items: this.items, 
+        // items: this.items, 
       }; 
     }, 
     created() {

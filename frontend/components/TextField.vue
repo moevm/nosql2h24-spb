@@ -2,6 +2,7 @@
     <v-text-field
     :label="label"
     :type="type"
+    :step="step"
     v-model="inputValue"
     @input="$emit('input', $event)"
     solo
@@ -28,6 +29,10 @@
                 default: ''
             },
             messages: {
+                type: String,
+                default: ''
+            },
+            step: {
                 type: String,
                 default: ''
             }
