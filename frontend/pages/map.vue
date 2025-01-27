@@ -82,9 +82,6 @@
 </template>
 
 <script setup>
-import { Vector } from 'ol/source';
-
-
 definePageMeta({
   layout: false,
 })
