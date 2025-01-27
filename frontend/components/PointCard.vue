@@ -1,20 +1,20 @@
 <template>
-    <v-card variant="flat" max-width="100%" class="shadow" color="primary" @click="choosed = !choosed">
+    <v-card variant="flat" max-width="100%" class="shadow" color="primary" @click="point.choosed = !point.choosed; updateFunction()">
         <div class="d-flex">
-            <v-avatar class="ma-3" size="90" rounded="0" :image="point.main_photo">
+            <v-avatar class="ma-3" size="90" rounded="0" :image="point.images[0]">
             </v-avatar>
             <v-card-text width="100" class="overflow-hidden pa-0 my-3" style="max-width: 214px;">
                 {{ point.name }}
             </v-card-text>
             <div>
-                <v-checkbox v-model="choosed" color="accent" hide-details></v-checkbox>
+                <v-checkbox v-model="point.choosed" @click="updateFunction" color="accent" hide-details></v-checkbox>
             </div>
         </div>
     </v-card>
 </template>
 
 <script setup>
-const props = defineProps({ point: { type: Object, required: true } });
+const props = defineProps({ point: { type: Object, required: true }, updateFunction: { type: Function, required: true } });
 props.point.selected = false;
 const choosed = ref(false)
 watch(choosed, () => { props.point.selected = choosed })
