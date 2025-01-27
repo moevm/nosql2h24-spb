@@ -8,10 +8,8 @@ export class CreatePointOfInterestDto {
     @MaxLength(50)
     name: string;
 
-    @IsString()
-    @MaxLength(2000)
-    description: string;
-
+    description: string[];
+    
     @IsObject()
     @ValidateNested()
     @Type(() => Point)

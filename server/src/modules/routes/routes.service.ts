@@ -3,6 +3,7 @@ import { Neo4jService } from "../neo4j/neo4j.service";
 import Route from "./entities/route.entity";
 import { CreateRouteDto } from "./dto/create-route.dto";
 import PointOfInterest from "../points-of-interest/entities/point-of-interest.entity";
+import { User } from "../users/entities/user.entity";
 
 
 @Injectable()
@@ -18,9 +19,9 @@ export class RoutesService {
             const result = await transaction.run(`
                 MATCH (user: User WHERE elementId(user) = "${userId}")
                 CREATE (user)-[:CREATED]->(route :Route {
-                    name: "${dto.name}", 
-                    description: "${dto.description}", 
-                    created_at: Datetime()
+                    route_name: "${dto.name}", 
+                    route_description: "${dto.description}", 
+                    route_created_at: Datetime()
                 }) 
                 WITH route, $poi_list AS points
                 UNWIND points AS point
@@ -54,11 +55,14 @@ export class RoutesService {
                     ORDER BY inc1.order
                 }
                 WITH DISTINCT route, i1, i2
-                CALL apoc.algo.aStarConfig(i1, i2, "ROAD_SEGMENT", {pointPropName: "location", weight: "length"})  
+                CALL apoc.algo.aStarConfig(i1, i2, "ROAD_SEGMENT", {
+                    pointPropName: "intersection_location", 
+                    weight: "road_length"
+                })  
                 YIELD weight
                 WITH SUM(weight) as total_distance, route
-                SET route.length = total_distance
-                SET route.duration = total_distance / 78
+                SET route.route_length = total_distance
+                SET route.route_duration = total_distance / 78
                 RETURN route
                 `,
                 { routeId: routeId }
@@ -82,7 +86,10 @@ export class RoutesService {
                 }
                 WITH i_list[0..-1] AS i1, i_list[1..] AS i2
                 UNWIND apoc.coll.zip(i1, i2) AS segment
-                CALL apoc.algo.aStarConfig(segment[0], segment[1], "ROAD_SEGMENT", {pointPropName: "location", weight: "length"})
+                CALL apoc.algo.aStarConfig(segment[0], segment[1], "ROAD_SEGMENT", {
+                    pointPropName: "intersection_location",
+                    weight: "road_length"
+                })
                 YIELD weight, path
                 RETURN weight AS length, path`,
                 { poi_list: poiList }
@@ -97,33 +104,44 @@ export class RoutesService {
         const session = this.neo4jService.getReadSession();
         try {
             const result = await session.run(`
-                MATCH (route :Route) 
+                MATCH (user:User)-[:CREATED]->(route:Route)
                 CALL (route) {
                     MATCH (route)-[inc :INCLUDE]->(poi :PointOfInterest)
                     RETURN poi
                     ORDER BY inc.order
                 }
-                RETURN route, collect(poi) AS poi_list
+                RETURN route, user, collect(poi) AS poi_list
                 `
             )
             return result.records.map(record => {
                 const node = record.get('route');
+
                 const poiList: PointOfInterest[] = record.get('poi_list').map(poi => new PointOfInterest(
                     poi.elementId,
-                    poi.properties.name,
-                    poi.properties.description,
-                    poi.properties.images,
-                    poi.properties.location,
-                    poi.properties.created_at.toString(),
+                    poi.properties.poi_name,
+                    poi.properties.poi_description,
+                    poi.properties.poi_images,
+                    poi.properties.poi_location,
+                    poi.properties.poi_created_at.toString(),
                 ));
+                const userNode = record.get('user');
+                const user = new User(
+                    userNode.elementId,
+                    userNode.properties.name,
+                    userNode.properties.email,
+                    undefined,
+                    userNode.properties.role,
+                    userNode.properties.created_at.toString()
+                );
                 return new Route(
                     node.elementId,
-                    node.properties.name,
-                    node.properties.description,
-                    node.properties.length,
-                    node.properties.duration,
-                    node.properties.created_at.toString(),
-                    poiList
+                    node.properties.route_name,
+                    node.properties.route_description,
+                    node.properties.route_length,
+                    node.properties.route_duration,
+                    node.properties.route_created_at.toString(),
+                    poiList,
+                    user
                 );
             });
         } finally {
@@ -136,35 +154,45 @@ export class RoutesService {
         try {
             const result = await session.run(
                 `
-                MATCH (route :Route WHERE elementId(route) = "${id}") 
+                MATCH (user)-[:CREATED]->(route :Route WHERE elementId(route) = "${id}") 
                 CALL (route) {
                     MATCH (route)-[inc :INCLUDE]->(poi :PointOfInterest)
                     RETURN poi
                     ORDER BY inc.order
                 }
-                RETURN route, collect(poi) AS poi_list
+                RETURN route, user, collect(poi) AS poi_list
                 `
             )
             const node = result.records.at(0)?.get('route');
-            const poiList: PointOfInterest[] = result.records.at(0)?.get('poi_list').map(poi => new PointOfInterest(
-                poi.elementId,
-                poi.properties.name,
-                poi.properties.description,
-                poi.properties.images,
-                poi.properties.location,
-                poi.properties.created_at.toString(),
-            ));
             if (!node) {
                 throw new NotFoundException(`Route with id: ${id} not found`);
             }
+            const userNode = result.records.at(0)?.get('user');
+            const user = new User(
+                userNode.elementId,
+                userNode.properties.name,
+                userNode.properties.email,
+                userNode.properties.password,
+                userNode.properties.role,
+                userNode.properties.created_at.toString()
+            );
+            const poiList: PointOfInterest[] = result.records.at(0)?.get('poi_list').map(poi => new PointOfInterest(
+                poi.elementId,
+                poi.properties.poi_name,
+                poi.properties.poi_description,
+                poi.properties.poi_images,
+                poi.properties.poi_location,
+                poi.properties.poi_created_at.toString(),
+            ));
             return new Route(
                 node.elementId,
-                node.properties.name,
-                node.properties.description,
-                node.properties.length,
-                node.properties.duration,
-                node.properties.created_at.toString(),
-                poiList
+                node.properties.route_name,
+                node.properties.route_description,
+                node.properties.route_length,
+                node.properties.route_duration,
+                node.properties.route_created_at.toString(),
+                poiList,
+                user
             );
         } finally {
             await session.close();

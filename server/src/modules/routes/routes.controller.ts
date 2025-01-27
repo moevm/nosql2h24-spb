@@ -33,7 +33,7 @@ export class RoutesController {
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    async delete(@Param('id') id: string,  @Req() req: any) {
+    async delete(@Param('id') id: string, @Req() req: any) {
         this.RoutesService.delete(id, req.user.sub);
     }
 }
