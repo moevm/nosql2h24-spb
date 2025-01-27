@@ -44,7 +44,7 @@
                   density="comfortable"></TextField>
               </div>
             </div>
-            <TextArea label="Описание маршрута" v-model="route_description"z>
+            <TextArea label="Описание маршрута" v-model="route_description" z>
 
             </TextArea>
             <div class="d-flex justify-end ga-5">
@@ -82,6 +82,8 @@
 </template>
 
 <script setup>
+import { Vector } from 'ol/source';
+
 
 definePageMeta({
   layout: false,
@@ -91,9 +93,29 @@ import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
 
 const mapContainer = ref(null);
-const { $ol } = useNuxtApp();
+const poi = ref(null);
+const { $ol, $config } = useNuxtApp();
 
 let map = null
+
+const drawPoints = (points) => {
+  var features = []
+  points.forEach(poi => {
+    console.log('poi:', poi);
+    features.push(new $ol.Feature(new $ol.Point($ol.fromLonLat(poi))))
+  })
+  console.log('features:', features);
+  const cluster = new $ol.Cluster({
+    distance: 30,
+    minDistance: 20,
+    source: new $ol.VectorSource({ features })
+  })
+  const veclayer = new $ol.VectorLayer({
+    source: cluster,
+    style: $ol.pointStyle
+  })
+  map.addLayer(veclayer)
+}
 
 onMounted(() => {
   let ar = [0, 0, 0, 0]
@@ -106,12 +128,6 @@ onMounted(() => {
     zoom: 17,
     extent: ar,
   });
-  // view['then'] = () => {
-  //   console.log('view loaded');
-  // }
-  console.log('map:', map);
-console.log('view:', view);
-console.log('typeof view:', typeof view);
 
   map = new $ol.Map({
     target: mapContainer.value,
@@ -123,9 +139,19 @@ console.log('typeof view:', typeof view);
     view: view,
     controls: []
   });
+
+  $fetch(`${$config.public.backendUrl}/api/poi`, {
+    method: 'GET'
+  }).then(res => {
+    poi.value = res
+    drawPoints(res.map(poi => [poi.location.x, poi.location.y]))
+    // drawPoints([[30.316229, 59.938732]])
+  })
 });
 
+
 const zoomIn = () => {
+  console.log('poi:', poi.value);
   map.getView().animate({
     zoom: map.getView().getZoom() + 1,
     duration: 200
@@ -145,6 +171,7 @@ export default {
     return {
       drawer: false,
       dialog: false,
+      poi: [],
       route_photo: 'https://sun9-34.userapi.com/s/v1/if1/Vk16_2miu_8rH8feSCI9JQqKKo95_us3mpBj29yfl7eGlxTrhlsvHG1e4woP7zhL2ebmcqOY.jpg?quality=96&as=32x24,48x36,72x54,108x81,160x121,240x181,360x272,480x362,540x408,640x483,720x543,848x640&from=bu&u=uAHL8XlnpBJYoXpEVgSlF6bfJuPn356m_8Ct00hdzxc&cs=848x640',
       column: [
         {

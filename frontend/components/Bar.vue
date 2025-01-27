@@ -9,7 +9,7 @@
       <img src="~/assets/icons/map.svg" />
     </v-btn>
 
-    <v-btn icon class="mx-7">
+    <v-btn icon class="mx-7" @click="navigateTo('/statistics')">
       <img src="~/assets/icons/bar-chart.svg" />
     </v-btn>
 
