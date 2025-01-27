@@ -9,17 +9,18 @@
                         v-model="this.chosenEntity" 
                         @update:data="handleUpdate"
                     />
-                        {{ filterData }}
                 </v-col>
             </v-row>
-            <v-row class="ma-5 headline">
+            {{ filterData }}
+            <v-row class="ml-5 mr-5 headline">
                 <v-col>
                     <p>Фильтры</p>
-                    <StatisticsFilters 
-                        v-model="filterData"
-                    />
                 </v-col>
             </v-row>
+                <StatisticsFilters 
+                    :filterData="filterData"
+                    v-model="filterData"
+                />
             <!-- <AccordionFeild /> -->
             <!-- <p>Статистика</p> -->
         </v-card-text>
@@ -37,15 +38,16 @@ export default {
                     entity: "Пользователь",
                     params: [
                         {
-                            label: "Пройденное расстояния",
-                            feilds: [
+                            label: "Пройденное расстояние",
+                            rule: "range",
+                            fields: [
                                 {
-                                    type: "number",
+                                    type: "decimal",
                                     text: "Мин. расстояние (км)",
                                     value: 0.1
                                 },
                                 {
-                                    type: "number",
+                                    type: "decimal",
                                     text: "Макс. расстояние (км)",
                                     value: 10
                                 },
@@ -53,7 +55,7 @@ export default {
                         },
                         {
                             label: "Пройденное время",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "number",
                                     text: "Мин. время (мин)",
@@ -68,7 +70,7 @@ export default {
                         },
                         {
                             label: "Пройденно маршрутов",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "number",
                                     text: "Мин. кол. маршрутов",
@@ -83,16 +85,16 @@ export default {
                         },
                         {
                             label: "Дата регистрации",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "date",
                                     text: "С",
-                                    value: 0
+                                    value: "2000-01-01"
                                 },
                                 {
                                     type: "date",
                                     text: "До",
-                                    value: new Date()
+                                    value: this.todayDate
                                 },
                             ]
                         },
@@ -103,14 +105,14 @@ export default {
                     params: [
                         {
                             label: "Длина",
-                            feilds: [
+                            fields: [
                                 {
-                                    type: "number",
+                                    type: "decimal",
                                     text: "Мин. длина (км)",
                                     value: 0.1
                                 },
                                 {
-                                    type: "number",
+                                    type: "decimal",
                                     text: "Макс. длина (км)",
                                     value: 10
                                 },
@@ -118,7 +120,7 @@ export default {
                         },
                         {
                             label: "Длительность",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "number",
                                     text: "Мин. время (мин)",
@@ -133,7 +135,7 @@ export default {
                         },
                         {
                             label: "Количество точек интереса",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "number",
                                     text: "Мин. кол. точек",
@@ -148,22 +150,22 @@ export default {
                         },
                         {
                             label: "Дата создания",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "date",
                                     text: "С",
-                                    value: 0
+                                    value: "2000-01-01"
                                 },
                                 {
                                     type: "date",
                                     text: "До",
-                                    value: new Date()
+                                    value: this.todayDate
                                 },
                             ]
                         },
                         {
                             label: "Автор",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "checkbox",
                                     text: "Только мои маршруты",
@@ -178,7 +180,7 @@ export default {
                         },
                         {
                             label: "Основные точки маршрута:",
-                            feilds: [
+                            fields: [
                                 {
                                     type: "button",
                                     text: "Добавить точек",
@@ -190,16 +192,18 @@ export default {
                 }
             },
             dataBaseEntities: {},
-            chosenEntity: null
+            chosenEntity: null,
+            todayDate: "2001-01-01"
         }; 
     },
     created() {
         this.getEntitiesListFromStructure(this.pageStructure)
+        this.setTodayDate()
     },
     computed: {
         filterData() {
             return Object.entries(this.pageStructure).find(elem => elem[1].entity == this.chosenEntity)
-        }
+        },
     },
     methods: {
         getEntitiesListFromStructure(struct) {
@@ -211,6 +215,11 @@ export default {
         },
         handleUpdate(data) {
             this.chosenEntity = data;
+        },
+        setTodayDate() {
+            let cd = new Date()
+            // this.todayDate = `${cd.getFullYear()}-${cd.getMonth()}-${cd.getDate()}`
+            this.todayDate =  `2020-01-21`
         }
     } 
 }
