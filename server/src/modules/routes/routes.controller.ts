@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Req, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { Public } from '../authorization/public.decorator';
 import { CreateRouteDto } from './dto/create-route.dto';
@@ -22,8 +22,18 @@ export class RoutesController {
     }
 
     @Get()
-    async findAll() {
-        return this.RoutesService.findAll();
+    async findAll(@Query('filters') filtersQuery: string) {
+        if (filtersQuery == null) {
+            return this.RoutesService.findAll();
+        }
+        try {
+            const filters = JSON.parse(filtersQuery);
+            return this.RoutesService.findAll(filters);
+        }
+        catch (e) {
+            throw new BadRequestException();
+        }
+
     }
 
     @Get(':id')

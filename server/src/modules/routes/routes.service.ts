@@ -4,6 +4,7 @@ import Route from "./entities/route.entity";
 import { CreateRouteDto } from "./dto/create-route.dto";
 import PointOfInterest from "../points-of-interest/entities/point-of-interest.entity";
 import { User } from "../users/entities/user.entity";
+import { RoutesFilterDto } from "./dto/routes-filter.dto";
 
 
 @Injectable()
@@ -100,18 +101,31 @@ export class RoutesService {
         }
     }
 
-    async findAll() {
+    async findAll(filters?: RoutesFilterDto) {
         const session = this.neo4jService.getReadSession();
         try {
             const result = await session.run(`
-                MATCH (user:User)-[:CREATED]->(route:Route)
+                MATCH (user:User 
+                    WHERE user.name =~ '.*(?ui)${filters?.author ?? ''}.*' OR elementId(user) = '${filters?.author ?? ''}'
+                )-[:CREATED]->(route:Route WHERE route.route_name =~ '.*(?ui)${filters?.search ?? ''}.*' 
+                    AND datetime(route.route_created_at) >= datetime('${filters?.minDate ?? '1970-01-01T00:00:00Z'}')
+                    AND datetime(route.route_created_at) <= datetime('${filters?.maxDate ?? '9999-12-31T23:59:59Z'}')
+                    AND route.route_length >= ${filters?.minLength ?? 0}
+                    AND route.route_length <= ${filters?.maxLength ?? Number.MAX_SAFE_INTEGER}
+                    AND route.route_duration >= ${filters?.minDuration ?? 0}
+                    AND route.route_duration <= ${filters?.maxDuration ?? Number.MAX_SAFE_INTEGER}
+                )
                 CALL (route) {
-                    MATCH (route)-[inc :INCLUDE]->(poi :PointOfInterest)
+                    MATCH (route)-[inc:INCLUDE]->(poi :PointOfInterest)
                     RETURN poi
                     ORDER BY inc.order
                 }
-                RETURN route, user, collect(poi) AS poi_list
-                `
+                WITH route, user, collect(elementId(poi)) AS poi_id_list, collect(poi) AS poi_list WHERE size(poi_list) >= ${filters?.minPoiCount ?? 2} 
+                    AND size(poi_list) <= ${filters?.maxPoiCount ?? Number.MAX_SAFE_INTEGER} 
+                    AND apoc.coll.containsAll(poi_id_list, $required_points) 
+
+                RETURN route, user, poi_list`,
+                { required_points: filters?.points ?? []}
             )
             return result.records.map(record => {
                 const node = record.get('route');
