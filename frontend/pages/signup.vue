@@ -59,6 +59,7 @@ export default {
         body: { email, password, name },
         onResponse: ({ request, response, options }) => {
           localStorage.setItem('access_token', response._data.access_token);
+          localStorage.setItem('user_id', response._data.user.id)
           console.log('ответ', response.status);
           if (response.status === 201) {
             console.log('Успешная регистрация');

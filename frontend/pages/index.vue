@@ -5,55 +5,116 @@
         <div class="d-flex flex-column ga-5">
           <div class="d-flex justify-space-between">
             <div class="d-flex flex-column">
-              <span class="text-h5">Егор Зимов</span>
-              <span style="text-decoration: underline;">e.zimov_letov@pochta.su</span>
-              <span>27.10.2025</span>
+              <span class="text-h5">{{ user?.name }}</span>
+              <span style="text-decoration: underline;">{{ user?.email }}</span>
+              <span>{{ formatDate(user?.createdAt) }}</span>
             </div>
             <v-btn icon color="transparent" elevation="0">
-              <img src="~/assets/icons/Log out.svg" @click="console.log('click')" />
+              <img src="~/assets/icons/Log out.svg" @click="logout()" />
             </v-btn>
           </div>
           <div class="d-flex align-center ga-2">
-            <SearchField hide-details rounded="xl" density="comfortable"></SearchField>
+            <SearchField hide-details rounded="xl" density="comfortable" :value="filters.search"></SearchField>
             <Btn density="comfortable" label="Фильтры"></Btn>
           </div>
           <div>
-            Всего маршрутов: 3
+            Всего маршрутов: {{ routes.length }}
           </div>
           <div class="text-h5">
             Перечень маршрутов
           </div>
           <v-row class="px-3 overflow-auto">
-            <RouteCard v-for="obj in routeList" :route="obj" :key="obj.id" class="mb-4"></RouteCard>
+            <RouteCard v-for="obj in routes" :route="obj" :key="obj.id" class="mb-4"></RouteCard>
           </v-row>
         </div>
       </v-sheet>
     </v-col>
   </v-row>
 </template>
-<script>
-export default {
-  name: 'IndexPage',
-  data() {
-    return {
-      email: '',
-      name: '',
-      registration_date: '',
-      routeList: [
-        {
-          main_photo: 'https://p0.citywalls.ru/thumb0_586-600700.jpg?mt=1674505477',
-          name: 'Мегамаршрут',
-          points_name: [
-            'Станция метро "Чёрная речка"',
-            'Место последней дуэли А.С, Пушкина',
-            'Мемориальный музей-квартира им. А.С Пушкина'
-          ],
-          length: '1.5 км',
-          duration: '30 мин',
-          description: 'Этот увлекательный маршрут по историческим местам Санкт-Петербурга и его окрестностям позволит вам погрузиться в мир великого русского поэта Александра Сергеевича Пушкина. Начнем с посещения дома на Мойке, где поэт жил и творил, вдохнув жизнь в свои знаменитые произведения. Далее мы направимся к Летнему саду, олицетворяющему классическую красоту и вдохновение, отразившееся в его лирике.'
-        }
-      ]
+
+
+<script setup>
+const { $config } = useNuxtApp();
+
+const user = ref(null);
+const routes = ref([]);
+const filters = reactive({
+  search: "",
+  minDate: null,
+  maxDate: null,
+  minLength: null,
+  maxLength: null,
+  minDuration: null,
+  maxDuration: null,
+  points: [],
+
+});
+
+watch(filters, () => {
+  $api(`${$config.public.backendUrl}/api/routes?filters=${JSON.stringify(filters)}`, {
+    onResponse: ({ request, response, options }) => {
+      console.log(request);
+      if (response.status == 200) {
+        routes.value = response._data;
+        routes.value.map(route => {
+          route.points.map(poi => {
+            poi.images = JSON.parse(poi.images)
+          })
+        })
+      }
+      else if (response.status == 401) {
+        logout();
+      }
     }
+
   }
+  )
+})
+
+onMounted(() => {
+  $api(`${$config.public.backendUrl}/api/users/${localStorage.getItem('user_id')}`, {
+    onResponse: (({ request, response, options }) => {
+      if (response.status == 200) {
+        user.value = response._data;
+      }
+      else if (response.status == 401) {
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('access_token');
+        navigateTo('/signin')
+      }
+    })
+  })
+
+  $api(`${$config.public.backendUrl}/api/routes`, {
+    onResponse: (({ request, response, options }) => {
+      if (response.status == 200) {
+        routes.value = response._data;
+        routes.value.map(route => {
+          route.points.map(poi => {
+            poi.images = JSON.parse(poi.images)
+          })
+        })
+      }
+      else if (response.status == 401) {
+        logout();
+      }
+    })
+  })
+})
+
+function logout() {
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('access_token');
+  navigateTo('/signin');
+}
+
+function formatDate(date) {
+  if (date == null) {
+    return ""
+  }
+  const [dateString, timeString] = date.split('T')
+  const [year, month, day] = dateString.split('-')
+  const [hours, minutes] = timeString.split(':')
+  return `${day}.${month}.${year} ${hours}:${minutes}`
 }
 </script>

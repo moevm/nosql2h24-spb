@@ -16,7 +16,7 @@ export class UsersController {
     @UseInterceptors(ClassSerializerInterceptor)
     @Get(':id')
     async findOne(@Param('id') id: string, @Req() req) {
-        if (id != req.user.sub || req.user.role != 'ADMIN') {
+        if (id != req.user.sub && req.user.role != 'ADMIN') {
             throw new ForbiddenException();
         }
         return this.usersService.findOne(id);

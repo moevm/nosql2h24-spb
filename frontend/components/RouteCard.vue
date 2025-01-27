@@ -1,21 +1,21 @@
 <template>
     <v-card variant="flat" max-width="100%" class="shadow w-100 py-5 px-6" color="background">
         <div class="d-flex ga-6">
-            <v-avatar size="120" rounded="0" :image="route.main_photo">
-            </v-avatar>
-            <v-sheet class="d-flex flex-column w-100" color="secondary">
-                <div class="text-h5">{{ route.name }}</div>
+        <router-link :to="'/routes/' + route.id"><v-avatar size="120" rounded="0" :image="route.points[0].images[0]">
+            </v-avatar></router-link>
+            <v-sheet class="d-flex flex-column w-100">
+                <div class="text-h5"><router-link class="text-decoration-none text-black" :to="'/routes/' + route.id">{{ route.name }}</router-link></div>
 
                 <div class="d-flex ga-3">
-                    <v-sheet class="d-flex flex-column flex-1-1-0" color="accent">
+                    <v-sheet class="d-flex flex-column flex-1-1-0">
                         Основные точки маршрута:
                         <div class="ml-5 points-container text-caption">
-                            <div v-for="point in route.points_name" :key="point.id">
-                                {{ point }}
+                            <div v-for="point in route.points.slice(0, 5)" :key="point.id">
+                                {{ point.name }}
                             </div>
                         </div>
                     </v-sheet>
-                    <v-sheet class="d-flex flex-column flex-1-1-0 justify-center" color="error">
+                    <v-sheet class="d-flex flex-column flex-1-1-0">
                         Характеристики маршрута:
                         <div class="ml-5">
                             <div>Длина: {{ route.length }}</div>
@@ -23,24 +23,6 @@
                         </div>
                     </v-sheet>
                 </div>
-
-
-                <!-- <div class="d-flex ga-3">
-                    <v-sheet class="d-flex flex-column flex-1-1-0" color="accent">
-                        <div class="font-weight-bold">Основные точки маршрута:</div>
-                        <div class="ml-5 points-container">
-                            <div v-for="point in route.points_name" :key="point.id">
-                                {{ point }}
-                            </div>
-                        </div>
-                    </v-sheet>
-                    <v-sheet class="d-flex flex-column flex-1-1-0 justify-center" color="secondary">
-                        <div class="ml-5">
-                            <div>Длина: {{ route.length }}</div>
-                            <div>Длительность: {{ route.duration }}</div>
-                        </div>
-                    </v-sheet>
-                </div> -->
             </v-sheet>
         </div>
     </v-card>

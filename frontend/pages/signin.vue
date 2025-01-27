@@ -61,6 +61,7 @@ export default {
             this.passwordMessages = '';
             this.emailMessages = '';
             localStorage.setItem('access_token', response._data.access_token);
+            localStorage.setItem('user_id', response._data.user.id);
             this.$router.push('/');
           }
           else {
