@@ -1,7 +1,6 @@
 <template>
-  <v-dialog v-model="dialog" class="deletion-dialog d-flex align-center justify-center" max-width="400"
-    min-height="1000px">
-    <v-card class="d-flex flex-column overflow-hidden" min-height="1000px">
+  <v-dialog v-model="dialog" class="deletion-dialog d-flex align-center justify-center" max-width="400px">
+    <v-card class="d-flex flex-column overflow-hidden">
       <v-card-title>Подтверждение удаления</v-card-title>
       <v-card-text class="font-weight-bold">Вы уверены, что хотите удалить маршрут?</v-card-text>
       <v-row justify="end" align="end" class="ma-5">
