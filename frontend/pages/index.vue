@@ -188,6 +188,9 @@ watch(filters, () => {
   filters.maxDuration = isNaN(numMaxDuration) ? undefined : numMaxDuration
   filters.minPoiCount = isNaN(numMinPoiCount) ? undefined : numMinPoiCount
   filters.maxPoiCount = isNaN(numMaxPoiCount) ? undefined : numMaxPoiCount
+  filters.minDate = filters.minDate ? filters.minDate: undefined
+  filters.maxDate = filters.maxDate ? filters.maxDate: undefined
+  
 
   $api(`${$config.public.backendUrl}/api/routes?filters=${JSON.stringify(filters)}`, {
 
