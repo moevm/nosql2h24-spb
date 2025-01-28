@@ -14,7 +14,7 @@
             </v-btn>
           </div>
           <div class="d-flex align-center ga-2">
-            <SearchField hide-details rounded="xl" density="comfortable" :value="filters.search"></SearchField>
+            <SearchField hide-details rounded="xl" density="comfortable" v-model="filters.search"></SearchField>
             <Btn density="comfortable" label="Фильтры"></Btn>
           </div>
           <div>
@@ -52,6 +52,7 @@ const filters = reactive({
 
 watch(filters, () => {
   $api(`${$config.public.backendUrl}/api/routes?filters=${JSON.stringify(filters)}`, {
+
     onResponse: ({ request, response, options }) => {
       console.log(request);
       if (response.status == 200) {
