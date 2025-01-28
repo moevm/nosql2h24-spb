@@ -19,9 +19,9 @@ export class Neo4jService implements OnApplicationShutdown, OnModuleInit {
             await session.run(`CREATE INDEX IF NOT EXISTS FOR ()-[r:ROAD_SEGMENT]-() ON r.road_osmid`);
             await session.run(`CREATE POINT INDEX IF NOT EXISTS FOR (i:Intersection) ON i.intersection_location`);
             await session.run(`CREATE INDEX IF NOT EXISTS FOR (i:Intersection) ON i._id`)
-    
+
             const countNode: number = (await session.run(`MATCH (n) RETURN COUNT(n) AS countNode`)).records.at(0).get('countNode');
-    
+
             if (countNode > 0) {
                 console.log("DB contains nodes initialization skipped")
                 return;
@@ -51,7 +51,7 @@ export class Neo4jService implements OnApplicationShutdown, OnModuleInit {
                         i.street_count = toInteger(row.street_count),
                         i._id = row._id
                 } IN TRANSACTIONS`
-            ); 
+            );
             await session.run(`
                 LOAD CSV WITH HEADERS FROM "file:///intersections_roads.csv" as row
                 WITH row WHERE row._type = "ROAD_SEGMENT"
@@ -64,7 +64,7 @@ export class Neo4jService implements OnApplicationShutdown, OnModuleInit {
                         r.road_name = row.road_name,
                         r.road_length = toFloat(row.road_length)
                 } IN TRANSACTIONS`
-            );  
+            );
             await session.run(` MATCH (n:Intersection) REMOVE n._id;`)
 
             await session.run(`
@@ -124,6 +124,31 @@ export class Neo4jService implements OnApplicationShutdown, OnModuleInit {
             defaultAccessMode: neo4j.session.WRITE,
         });
     }
+
+    async exportData() {
+        const session = this.getReadSession();
+        try {
+            const result = await session.run(`
+                CALL apoc.export.json.all(null, {stream: true}) 
+                YIELD file, nodes, relationships, properties, data
+                RETURN file, nodes, relationships, properties, data
+            `);
+            const nodesCount = result.records.at(0).get('nodes')
+            const relationshipsCount = result.records.at(0).get('relationships')
+            const data = result.records.at(0).get('data');
+            return {
+                nodesCount: nodesCount,
+                relationshipsCount: relationshipsCount,
+                data: data
+            };
+        }
+        finally {
+            await session.close();
+        }
+    }
+
+
+
 
     onApplicationShutdown() {
         return this.driver.close();
