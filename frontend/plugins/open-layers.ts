@@ -6,6 +6,7 @@ import OSM from 'ol/source/OSM';
 import { fromLonLat } from 'ol/proj';
 import Feature from 'ol/Feature.js';
 import Point from 'ol/geom/Point.js';
+import { LineString } from 'ol/geom';
 import { Vector as VectorSource } from 'ol/source.js';
 import { Cluster } from 'ol/source.js';
 import VectorLayer from 'ol/layer/Vector';
@@ -24,7 +25,6 @@ import {
 const singleStyle = function (feature: any) {
   const color = feature.values_.poi.choosed ? 'rgba(93,128,122,1)' : 'rgba(182, 91, 91, 1)'
   if (feature.values_.poi.choosed) {
-    console.log('singleStyle:', feature.values_.poi);
   }
   return new Style({
   image: new Icon({
@@ -56,10 +56,16 @@ const pointStyle = function (feature: any) {
   if (i > 1) {
     return clusterStyle(i);
   } else {
-    // console.log('singleStyle:', feature.get('features')[0].values_.poi);
     return singleStyle(features[0]);
   }
 }
+
+const routeStyle = new Style({
+  stroke: new Stroke({
+    color: 'rgba(93,128,122,1)',
+    width: 5
+  })
+})
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.provide('ol', {
@@ -74,6 +80,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     Cluster,
     VectorLayer,
     pointStyle,
-    Overlay
+    Overlay,
+    LineString,
+    routeStyle
   });
 });

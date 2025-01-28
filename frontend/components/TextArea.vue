@@ -1,5 +1,5 @@
 <template>
-    <v-textarea variant="solo" hide-details rounded="xl" color="secondary" bg-color="background" class="shadow">
+    <v-textarea variant="solo" rounded="xl" color="secondary" bg-color="background" class="shadow">
     </v-textarea>
 </template>
 <style>
