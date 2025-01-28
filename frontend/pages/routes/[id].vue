@@ -48,7 +48,7 @@
             <v-card-title>Основные характеристики:</v-card-title>
             <div class="justify-space-between d-flex">
               <v-card-text>Длина:</v-card-text>
-              <v-card-text>{{ (route?.length / 1000).toFixed(1) }} км</v-card-text>
+              <v-card-text>{{ (route?.length ?? 0).toFixed(1) }} м</v-card-text>
             </div>
             <div class="justify-space-between d-flex">
               <v-card-text>Длительность:</v-card-text>
@@ -113,7 +113,7 @@ function formatDate(date) {
   if (date == null) {
     return ""
   }
-  const [dateString, timeString] = date.split('T')
+  const [dateString, timeString ] = date.split('T')
   const [year, month, day] = dateString.split('-')
   const [hours, minutes] = timeString.split(':')
   return `${day}.${month}.${year} ${hours}:${minutes}`

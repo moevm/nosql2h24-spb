@@ -18,7 +18,7 @@
                     <v-sheet class="d-flex flex-column flex-1-1-0">
                         Характеристики маршрута:
                         <div class="ml-5">
-                            <div>Длина: {{ (route.length / 1000).toFixed(1) }} км</div>
+                            <div>Длина: {{ (route.length).toFixed(1) }} м</div>
                             <div>Длительность: {{ (route.duration / 60).toFixed(0) }} ч {{ (route.duration % 60).toFixed(0) }} мин</div>
                         </div>
                     </v-sheet>
