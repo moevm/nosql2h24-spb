@@ -1,6 +1,6 @@
 <template>
     <v-btn :label="label" color="secondary" class="shadow text-h5 text-capitalize text-primary rounded-xl"
-        density="default" size="x-large" @click="$emit('click')">
+        density="default" size="x-large">
         {{ label }}
     </v-btn>
 </template>

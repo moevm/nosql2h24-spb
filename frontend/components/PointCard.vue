@@ -13,20 +13,11 @@
     </v-card>
 </template>
 
-<script>
-export default {
-    props: {
-        point: {
-            type: Object,
-            required: true
-        }
-    },
-    data() {
-        return {
-            choosed: false
-        }
-    }
-}
+<script setup>
+const props = defineProps({ point: { type: Object, required: true } });
+props.point.selected = false;
+const choosed = ref(false)
+watch(choosed, () => { props.point.selected = choosed })
 </script>
 
 <style scoped>

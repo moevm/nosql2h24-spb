@@ -1,14 +1,15 @@
 <template>
-   <v-dialog v-model="dialog" class="deletion-dialog d-flex align-center justify-center" max-width="400">
-      <v-card width="400" height="200" class="d-flex flex-column overflow-hidden">
-        <v-card-title>Подтверждение удаления</v-card-title>
-        <v-card-text class="font-weight-bold">Вы уверены, что хотите удалить маршрут?</v-card-text>
-        <v-row justify="end" align="end" class="ma-5">
-          <v-btn class="mx-5" @click="dialog = false;">Отмена</v-btn>
-          <v-btn @click="dialog = false; deleteRoute()">Ок</v-btn>
-        </v-row>
-      </v-card>
-    </v-dialog>
+  <v-dialog v-model="dialog" class="deletion-dialog d-flex align-center justify-center" max-width="400"
+    min-height="1000px">
+    <v-card class="d-flex flex-column overflow-hidden" min-height="1000px">
+      <v-card-title>Подтверждение удаления</v-card-title>
+      <v-card-text class="font-weight-bold">Вы уверены, что хотите удалить маршрут?</v-card-text>
+      <v-row justify="end" align="end" class="ma-5">
+        <v-btn class="mx-5" @click="dialog = false;">Отмена</v-btn>
+        <v-btn @click="dialog = false; deleteRoute()">Ок</v-btn>
+      </v-row>
+    </v-card>
+  </v-dialog>
   <v-row justify="center" align="center">
     <v-col cols="16" sm="15" md="12">
       <v-card class="route-card" color="background">
@@ -119,7 +120,7 @@ function formatDate(date) {
 }
 
 async function deleteRoute() {
-  await $api(`${$config.public.backendUrl}/api/routes/${routeId}`, {method: 'DELETE'});
+  await $api(`${$config.public.backendUrl}/api/routes/${routeId}`, { method: 'DELETE' });
   router.push('/')
 }
 
