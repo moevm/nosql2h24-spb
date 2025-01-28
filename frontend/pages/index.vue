@@ -176,6 +176,19 @@ watch(onlyUserRoutes, () => {
 
 
 watch(filters, () => {
+  const numMinLength = parseFloat(filters.minLength)
+  const numMaxLength = parseFloat(filters.maxLength)
+  const numMinDuration = parseFloat(filters.minDuration)
+  const numMaxDuration = parseFloat(filters.MaxDuration)
+  const numMinPoiCount = parseInt(filters.minPoiCount)
+  const numMaxPoiCount = parseInt(filters.maxPoiCount)
+  filters.minLength = isNaN(numMinLength) ? undefined : numMinLength
+  filters.maxLength = isNaN(numMaxLength) ? undefined : numMaxLength
+  filters.minDuration = isNaN(numMinDuration) ? undefined : numMinDuration
+  filters.maxDuration = isNaN(numMaxDuration) ? undefined : numMaxDuration
+  filters.minPoiCount = isNaN(numMinPoiCount) ? undefined : numMinPoiCount
+  filters.maxPoiCount = isNaN(numMaxPoiCount) ? undefined : numMaxPoiCount
+
   $api(`${$config.public.backendUrl}/api/routes?filters=${JSON.stringify(filters)}`, {
 
     onResponse: ({ request, response, options }) => {

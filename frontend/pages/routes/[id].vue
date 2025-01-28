@@ -52,7 +52,7 @@
             </div>
             <div class="justify-space-between d-flex">
               <v-card-text>Длительность:</v-card-text>
-              <v-card-text>{{ (route?.duration / 60).toFixed(0) }} ч {{ (route?.duration % 60).toFixed(0) }}
+              <v-card-text>{{ Math.floor(route?.duration / 60) }} ч {{ Math.floor(route?.duration % 60) }}
                 мин</v-card-text>
             </div>
           </div>
