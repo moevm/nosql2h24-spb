@@ -1,8 +1,7 @@
 <template>
   <v-dialog v-model="dialog" class="poi-add-dialog d-flex align-center justify-center" max-width="400">
     <v-card class="d-flex flex-column overflow-hidden">
-      <v-card-title>Подтверждение удаления</v-card-title>
-      <v-card-text class="font-weight-bold">Вы уверены, что хотите удалить маршрут?</v-card-text>
+      <v-card-title>Выбор точек</v-card-title>
       <SearchField label="Название точки" class="mx-4 mt-4 flex-0-0" v-model="searchPoi"></SearchField>
       <v-container class="flex-grow-1 d-flex flex-column overflow-auto">
         <v-row class="px-3 overflow-auto">
