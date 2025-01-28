@@ -1,6 +1,6 @@
 <template>
-    <v-text-field :label="label" :type="type" v-model="inputValue" @input="$emit('input', $event)" class="shadow"
-        rounded="xl" color="secondary" bg-color="background" variant="solo" :rules="rules" :error-messages="messages">
+    <v-text-field :label="label" :type="type" v-model="inputValue" @input="$emit('input', $event)" variant="solo"
+        density="compact" prepend-inner-icon="mdi-magnify" bg-color="primary" class="shadow">
     </v-text-field>
 </template>
 
@@ -36,7 +36,6 @@ export default {
     }
 }
 </script>
-
 <style>
 .shadow .v-field {
     box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px 0 rgba(0, 0, 0, 0.25);
