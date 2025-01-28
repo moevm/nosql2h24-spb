@@ -19,7 +19,7 @@
                         Характеристики маршрута:
                         <div class="ml-5">
                             <div>Длина: {{ (route.length).toFixed(1) }} м</div>
-                            <div>Длительность: {{ (route.duration / 60).toFixed(0) }} ч {{ (route.duration % 60).toFixed(0) }} мин</div>
+                            <div>Длительность: {{ Math.floor(route.duration / 60) }} ч {{ Math.floor(route.duration % 60) }} мин</div>
                         </div>
                     </v-sheet>
                 </div>
