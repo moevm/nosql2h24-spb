@@ -5,12 +5,13 @@
       <SearchField label="Название точки" class="mx-4 mt-4 flex-0-0" v-model="searchPoi"></SearchField>
       <v-container class="flex-grow-1 d-flex flex-column overflow-auto">
         <v-row class="px-3 overflow-auto">
-          <PointCard v-for="obj in points_column" :point="obj" :key="obj.id" class="mb-4 w-100"></PointCard>
+          <PointCard v-for="obj in points_column" :update-function="function () { }" 
+          :poi-choosed="filters.points" :point="obj"
+            :key="obj.id" class="mb-4 w-100"></PointCard>
         </v-row>
       </v-container>
       <v-row justify="end" align="end" class="ma-5">
-        <v-btn class="mx-5" @click="dialog = false;">Отмена</v-btn>
-        <v-btn @click="dialog = false; addPoints()">Ок</v-btn>
+        <v-btn @click="dialog = false;">Закрыть</v-btn>
       </v-row>
     </v-card>
   </v-dialog>
@@ -31,7 +32,7 @@
           <div class="d-flex justify-space-between">
             <Btn label="Точки интереса" to="/st/poi" density="comfortable"></Btn>
             <Btn label="Маршруты" to="/st/route" density="comfortable"></Btn>
-            <Btn label="Пользователи"" to="/st/user" density="comfortable"></Btn>
+            <Btn label="Пользователи" to="/st/user" density="comfortable"></Btn>
           </div>
           <div class="d-flex align-center ga-2">
             <SearchField hide-details rounded="xl" density="comfortable" v-model="filters.search"></SearchField>
@@ -160,7 +161,7 @@ watch(searchPoi, () => {
       if (response.status == 200) {
         points_column.value = response._data;
         points_column.value.map(poi => {
-          poi.main_photo = JSON.parse(poi.images)[0]
+          poi.images = JSON.parse(poi.images)
         })
       }
       else if (response.status == 401) {
@@ -192,9 +193,9 @@ watch(filters, () => {
   filters.maxDuration = isNaN(numMaxDuration) ? undefined : numMaxDuration
   filters.minPoiCount = isNaN(numMinPoiCount) ? undefined : numMinPoiCount
   filters.maxPoiCount = isNaN(numMaxPoiCount) ? undefined : numMaxPoiCount
-  filters.minDate = filters.minDate ? filters.minDate: undefined
-  filters.maxDate = filters.maxDate ? filters.maxDate: undefined
-  
+  filters.minDate = filters.minDate ? filters.minDate : undefined
+  filters.maxDate = filters.maxDate ? filters.maxDate : undefined
+
 
   $api(`${$config.public.backendUrl}/api/routes?filters=${JSON.stringify(filters)}`, {
 
@@ -252,8 +253,7 @@ onMounted(() => {
       if (response.status == 200) {
         points_column.value = response._data;
         points_column.value.map(poi => {
-          poi.main_photo = JSON.parse(poi.images)[0]
-          poi.selected = false;
+          poi.images = JSON.parse(poi.images)
         })
       }
       else if (response.status == 401) {
@@ -279,8 +279,4 @@ function formatDate(date) {
   return `${day}.${month}.${year} ${hours}:${minutes}`
 }
 
-function addPoints() {
-  const selectedPoints = points_column.value.filter(poi => poi.selected);
-  filters.points = selectedPoints.map(poi => poi.id);
-}
 </script>

@@ -15,9 +15,6 @@
 
 <script setup>
 const props = defineProps({ point: { type: Object, required: true }, updateFunction: { type: Function, required: true } , poiChoosed: { type: Array, required: true }});
-props.point.selected = false;
-const choosed = ref(false)
-watch(choosed, () => { props.point.selected = choosed })
 
 const isChoosed = computed({
   get: () => props.poiChoosed.includes(props.point.id),
