@@ -53,7 +53,79 @@ export class PointsOfInterestService {
                 WHERE poi.poi_name =~ '.*(?ui)${query ?? ''}.*'
                 RETURN poi`
             );
-            
+
+            return result.records.map(record => {
+                const node = record.get('poi');
+                return new PointOfInterest(
+                    node.elementId,
+                    node.properties.poi_name,
+                    node.properties.poi_description,
+                    node.properties.poi_images,
+                    node.properties.poi_location,
+                    node.properties.poi_created_at.toString()
+                );
+            });
+        } finally {
+            await session.close();
+        }
+    }
+
+    async findAllFiltr(filtr: any) {
+        const session = this.neo4jService.getReadSession();
+        try {
+            const queryParams: any = {};
+            const conditions: string[] = [];
+
+            if (filtr.name) {
+                conditions.push('LOWER(poi.poi_name) =~ LOWER($name)');
+                queryParams.name = `(?i).*${filtr.name.toLowerCase()}.*`;
+            }
+
+            if (filtr.description) {
+                conditions.push('ANY(d IN poi.poi_description WHERE LOWER(d) =~ LOWER($description))');
+                queryParams.description = `(?i).*${filtr.description.toLowerCase()}.*`;
+            }
+
+            if (filtr.fromDate) {
+                conditions.push('poi.poi_created_at >= datetime($fromDate)');
+                queryParams.fromDate = filtr.fromDate;
+            }
+
+            if (filtr.toDate) {
+                conditions.push('poi.poi_created_at <= datetime($toDate)');
+                queryParams.toDate = filtr.toDate;
+            }
+
+            if (filtr.fromLat) {
+                conditions.push('poi.poi_location.latitude >= $fromLat');
+                queryParams.fromLat = parseFloat(filtr.fromLat);
+            }
+
+            if (filtr.fromLng) {
+                conditions.push('poi.poi_location.longitude >= $fromLng');
+                queryParams.fromLng = parseFloat(filtr.fromLng);
+            }
+
+            if (filtr.toLat) {
+                conditions.push('poi.poi_location.latitude <= $toLat');
+                queryParams.toLat = parseFloat(filtr.toLat);
+            }
+
+            if (filtr.toLng) {
+                conditions.push('poi.poi_location.longitude <= $toLng');
+                queryParams.toLng = parseFloat(filtr.toLng);
+            }
+
+            let query = 'MATCH (poi:PointOfInterest)';
+
+            if (conditions.length > 0) {
+                query += '\nWHERE ' + conditions.join('\nAND ');
+            }
+
+            query += '\nRETURN poi';
+
+            const result = await session.run(query, queryParams);
+
             return result.records.map(record => {
                 const node = record.get('poi');
                 return new PointOfInterest(

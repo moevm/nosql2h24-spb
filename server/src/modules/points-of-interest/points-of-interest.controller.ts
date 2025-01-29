@@ -21,6 +21,12 @@ export class PointsOfInterestController {
     }
 
     @Public()
+    @Post('/filtr')
+    async findAllFiltr(@Body() filtr: any) {
+        return this.pointsOfInterestService.findAllFiltr(filtr);
+    }
+
+    @Public()
     @Get(':id')
     async findOne(@Param('id') id: string) {
         return this.pointsOfInterestService.findOne(id);
