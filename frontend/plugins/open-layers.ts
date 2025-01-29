@@ -23,9 +23,7 @@ import {
 } from 'ol/style.js';
 
 const singleStyle = function (feature: any) {
-  const color = feature.values_.poi.choosed ? 'rgba(93,128,122,1)' : 'rgba(182, 91, 91, 1)'
-  if (feature.values_.poi.choosed) {
-  }
+  const color = feature.values_.isChoosed() ? 'rgba(93,128,122,1)' : 'rgba(182, 91, 91, 1)'
   return new Style({
   image: new Icon({
     src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="30" viewBox="0 0 20 30" fill="${color}"><path d="M10 0C15.5 0 20 5 20 10C20 15 10 30 10 30C10 30 0 15 0 10C0 5 4.5 0 10 0Z"/></svg>`,

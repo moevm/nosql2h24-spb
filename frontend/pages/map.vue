@@ -2,13 +2,19 @@
   <v-app dark>
     <v-navigation-drawer v-model="drawer" color="secondary" width="400" floating>
       <div class="d-flex flex-column overflow-hidden" style="height: 100%;">
-        <SearchField class="mx-4 mt-4 flex-0-0"></SearchField>
+        <SearchField :readonly="walk_status" @input="searchPoi" v-model="searchPoiValue" class="mx-4 mt-4 flex-0-0">
+        </SearchField>
         <v-container class="flex-grow-1 d-flex flex-column overflow-auto">
 
           <v-row class="px-3 overflow-auto">
-            <draggable v-model="poi" ref="draggable" tag="div" v-bind="dragOptions" handle=".handle">
-              <PointCard v-for="item in poi" :point="item" :updateFunction="pointUpdate" :key="item.id"
-                class="mb-4 handle">
+            <draggable v-if="!searchPoiValue" v-model="poi" ref="draggable" tag="div" v-bind="dragOptions" handle=".handle">
+              <PointCard v-for="item in poi" :point="item" :poiChoosed="poiChoosed" :updateFunction="pointUpdate"
+                :key="item.id" class="mb-4 handle">
+              </PointCard>
+            </draggable>
+            <draggable v-if="searchPoiValue" v-model="searchResult" ref="draggable" tag="div" v-bind="dragOptions" handle=".handle">
+              <PointCard v-for="item in searchResult" :point="item" :poiChoosed="poiChoosed" :updateFunction="pointUpdate"
+                :key="item.id" class="mb-4 handle">
               </PointCard>
             </draggable>
           </v-row>
@@ -16,13 +22,13 @@
         </v-container>
         <v-toolbar color="secondary" class="pa-4">
           <v-spacer />
-          <v-btn icon class="mx-7" @click="nameMessages = ''; dialog = true">
+          <v-btn v-if="!walk_status" icon class="mx-7" @click="nameMessages = ''; dialog = true">
             <img src="~/assets/icons/Save.svg" class="icon-svg" />
           </v-btn>
-          <v-btn icon class="mx-7" @click="buildRoute(poi.filter(p => p.choosed === true).map(p => p.id))">
+          <v-btn v-if="!walk_status" icon class="mx-7" @click="buildRoute(poiChoosed)">
             <img src="~/assets/icons/directions_walk.svg" class="icon-svg" />
           </v-btn>
-          <v-btn icon class="mx-7" @click="console.log('click')">
+          <v-btn icon class="mx-7" @click="walk_status = false; routeLayer.getSource().clear();">
             <img src="~/assets/icons/close.svg" class="icon-svg" />
           </v-btn>
           <v-spacer />
@@ -83,7 +89,7 @@
 
 
       <div id="popup" ref="popup" class="ol-popup">
-        <MapPoint :point="mappoint" :updateFunction="pointUpdate"></MapPoint>
+        <MapPoint :point="mappoint" :poiChoosed="poiChoosed" :updateFunction="pointUpdate"></MapPoint>
       </div>
 
 
@@ -96,16 +102,51 @@ import MapPoint from '~/components/MapPoint.vue';
 
 import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
-import { Feature } from 'ol';
 
 definePageMeta({
   layout: false,
 })
 
+const poiChoosed = ref([])
 const mapContainer = ref(null);
 const poi = ref(null);
 const mappoint = ref(null);
-const { $ol, $config, $fetch_auth } = useNuxtApp();
+const { $ol, $config } = useNuxtApp();
+const dialog = ref(false);
+
+const walk_status = ref(false);
+
+
+const searchPoiValue = ref('')
+const searchResult = ref([])
+const searchPoi = async function () {
+  try {
+    const queryParams = {
+      name: searchPoiValue.value || undefined,
+      description: searchPoiValue.value || undefined,
+      fromDate: undefined,
+      toDate: undefined,
+      fromLat: undefined,
+      toLat: undefined,
+      fromLng: undefined,
+      toLng: undefined
+    };
+    const response = await $fetch(`${$config.public.backendUrl}/api/poi/filtr`, {
+      method: 'POST',
+      body: queryParams
+    });
+
+    searchResult.value = response.map(poi => {
+      poi.images = JSON.parse(poi.images)
+      return poi
+    })
+
+  } catch (err) {
+    console.error('Ошибка фильтрации:', err);
+  }
+}
+
+
 
 let map = null
 let pointsLayer = null
@@ -116,7 +157,10 @@ const drawPoints = (points) => {
   points.forEach(poi => {
     features.push(new $ol.Feature({
       geometry: new $ol.Point($ol.fromLonLat([poi.location.x, poi.location.y])),
-      poi: poi
+      poi: poi,
+      isChoosed: function () {
+        return poiChoosed.value.includes(poi.id)
+      }
     }))
   })
   const cluster = new $ol.Cluster({
@@ -197,7 +241,6 @@ onMounted(() => {
   }).then(res => {
     poi.value = res.map(poi => {
       poi.images = JSON.parse(poi.images)
-      poi.choosed = false
       return poi
     })
     drawPoints(poi.value)
@@ -228,27 +271,12 @@ const route_name = ref('');
 const route_description = ref('');
 const route = ref({});
 
-
-const createRoute = function () {
-  const choosed = poi.value.filter(p => p.choosed)
-  if (!valid.value) {
-    return
-  }
-  if (choosed.length < 2) {
-    nameMessages.value = 'Выберите минимум 2 точки'
-    return
-  }
-
-
-  $fetch(`${$config.public.backendUrl}/api/routes`, {
-    method: 'POST',
+const hash = ref(useRoute().hash)
+if (hash.value !== '') {
+  $fetch(`${$config.public.backendUrl}/api/routes/${hash.value.slice(1)}`, {
+    method: 'GET',
     headers: {
       Authorization: `Bearer ${localStorage.getItem('access_token')}`
-    },
-    body: {
-      name: route_name.value,
-      description: route_description.value,
-      points: choosed.map(p => p.id)
     },
     onResponse: function ({ request, response, options }) {
       if (response.status === 401) {
@@ -263,7 +291,53 @@ const createRoute = function () {
   })
 }
 
+const createRoute = function () {
+  if (!valid.value) {
+    return
+  }
+  if (poiChoosed.length < 2) {
+    nameMessages.value = 'Выберите минимум 2 точки'
+    return
+  }
+  dialog.value = false
+
+
+  $fetch(`${$config.public.backendUrl}/api/routes`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('access_token')}`
+    },
+    body: {
+      name: route_name.value,
+      description: route_description.value,
+      points: poiChoosed.value
+    },
+    onResponse: function ({ request, response, options }) {
+
+      if (response.status === 401) {
+        console.log('unauthorized')
+        localStorage.removeItem('access_token')
+        navigateTo('/signin')
+        return
+      }
+      route.value = response._data
+      buildRoute(route.value.points.map(p => p.id))
+    }
+  })
+}
+
 const buildRoute = (array) => {
+  walk_status.value = true
+  // pointsLayer.getSource().clear()
+  // poi.value = poiChoosed.value.map(id => {
+  //   var res = $fetch(`${$config.public.backendUrl}/api/poi:${id}`, {
+  //     method: 'GET'
+  //   })
+  //   res.image = JSON.parse(res.image)
+  //   return res
+  // })
+  // drawPoints(poi.value)
+
   if (routeLayer) {
     map.removeLayer(routeLayer)
   }
@@ -276,7 +350,7 @@ const buildRoute = (array) => {
     onResponse: function ({ request, response, options }) {
       const path = response._data.map(p => p.path)
       var pathList = [path[0].start.properties.intersection_location]
-      for (let i = 0; i < path.length; i++){
+      for (let i = 0; i < path.length; i++) {
         pathList.push(...path[i].segments.map(segment => {
           return segment.end.properties.intersection_location
         }))
