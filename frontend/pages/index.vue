@@ -31,7 +31,7 @@
           <div class="d-flex justify-space-between">
             <Btn label="Точки интереса" to="/st/poi" density="comfortable"></Btn>
             <Btn label="Маршруты" to="/st/route" density="comfortable"></Btn>
-            <Btn label="Пользователи"" to="/st/user" density="comfortable"></Btn>
+            <Btn label="Пользователи" to="/st/user" density="comfortable"></Btn>
           </div>
           <div class="d-flex align-center ga-2">
             <SearchField hide-details rounded="xl" density="comfortable" v-model="filters.search"></SearchField>
