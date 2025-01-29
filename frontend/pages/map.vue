@@ -2,25 +2,33 @@
   <v-app dark>
     <v-navigation-drawer v-model="drawer" color="secondary" width="400" floating>
       <div class="d-flex flex-column overflow-hidden" style="height: 100%;">
-        <SearchField class="mx-4 mt-4 flex-0-0"></SearchField>
+        <SearchField :readonly="walk_status" @input="searchPoi" v-model="searchPoiValue" class="mx-4 mt-4 flex-0-0">
+        </SearchField>
         <v-container class="flex-grow-1 d-flex flex-column overflow-auto">
 
           <v-row class="px-3 overflow-auto">
-            <draggable v-model="column" tag="div" v-bind="dragOptions">
-              <PointCard v-for="obj in column" :point="obj" :key="obj.id" class="mb-4"></PointCard>
+            <draggable v-if="!searchPoiValue" v-model="poi" ref="draggable" tag="div" v-bind="dragOptions" handle=".handle">
+              <PointCard v-for="item in poi" :point="item" :poiChoosed="poiChoosed" :updateFunction="pointUpdate"
+                :key="item.id" class="mb-4 handle">
+              </PointCard>
+            </draggable>
+            <draggable v-if="searchPoiValue" v-model="searchResult" ref="draggable" tag="div" v-bind="dragOptions" handle=".handle">
+              <PointCard v-for="item in searchResult" :point="item" :poiChoosed="poiChoosed" :updateFunction="pointUpdate"
+                :key="item.id" class="mb-4 handle">
+              </PointCard>
             </draggable>
           </v-row>
 
         </v-container>
         <v-toolbar color="secondary" class="pa-4">
           <v-spacer />
-          <v-btn icon class="mx-7" @click="dialog = true">
+          <v-btn v-if="!walk_status" icon class="mx-7" @click="nameMessages = ''; dialog = true">
             <img src="~/assets/icons/Save.svg" class="icon-svg" />
           </v-btn>
-          <v-btn icon class="mx-7" @click="console.log('click')">
+          <v-btn v-if="!walk_status" icon class="mx-7" @click="buildRoute(poiChoosed)">
             <img src="~/assets/icons/directions_walk.svg" class="icon-svg" />
           </v-btn>
-          <v-btn icon class="mx-7" @click="console.log('click')">
+          <v-btn icon class="mx-7" @click="walk_status = false; routeLayer.getSource().clear();">
             <img src="~/assets/icons/close.svg" class="icon-svg" />
           </v-btn>
           <v-spacer />
@@ -32,25 +40,26 @@
       <v-card class="rounded-xl" color="primary">
         <v-container class="pa-8">
           <div class="d-flex flex-column ga-5">
-            <div class="d-flex ga-5 align-center">
-              <v-avatar size="160" rounded="0" :image="route_photo">
-              </v-avatar>
-              <div class="d-flex flex-column ga-9 fill-height">
-                <div class="text-h5">
-                  Создание записи о маршруте
-                </div>
-                <!-- <v-text-field label="Название маршрута" v-model="route_name" hide-details density="comfortable" variant="solo" rounded="xl"></v-text-field> -->
-                <TextField label="Название маршрута" v-model="route_name" variant="solo" hide-details
-                  density="comfortable"></TextField>
-              </div>
-            </div>
-            <TextArea label="Описание маршрута" v-model="route_description" z>
+            <v-form v-model="valid" validate-on="invalid-input" @submit.prevent="createRoute">
+              <div class="d-flex ga-5 align-center">
+                <!-- <v-avatar size="160" rounded="0" :image="route_photo">
+              </v-avatar> -->
+                <div class="d-flex flex-column ga-9 fill-height">
+                  <div class="text-h5">
+                    Создание записи о маршруте
+                  </div>
 
-            </TextArea>
-            <div class="d-flex justify-end ga-5">
-              <Btn label="Отменить" class="custom-margin" @click="dialog = false" density="comfortable"></Btn>
-              <Btn label="Сохранить" class="custom-margin" @click="dialog = false" density="comfortable"></Btn>
-            </div>
+                  <TextField :messages="nameMessages" @input="nameMessages = ''" label="Название маршрута"
+                    v-model="route_name" variant="solo" density="comfortable" :rules="[rules.name]"></TextField>
+                </div>
+              </div>
+              <TextArea label="Описание маршрута" v-model="route_description" :rules="[rules.description]">
+              </TextArea>
+              <div class="d-flex justify-end ga-5">
+                <Btn label="Отменить" class="custom-margin" @click="dialog = false" density="comfortable"></Btn>
+                <Btn label="Сохранить" class="custom-margin" type="submit" density="comfortable"></Btn>
+              </div>
+            </v-form>
           </div>
         </v-container>
       </v-card>
@@ -77,42 +86,98 @@
       <v-container>
         <div ref="mapContainer" class="map-container"></div>
       </v-container>
+
+
+      <div id="popup" ref="popup" class="ol-popup">
+        <MapPoint :point="mappoint" :poiChoosed="poiChoosed" :updateFunction="pointUpdate"></MapPoint>
+      </div>
+
+
     </v-main>
   </v-app>
 </template>
 
 <script setup>
-definePageMeta({
-  layout: false,
-})
+import MapPoint from '~/components/MapPoint.vue';
 
 import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
 
+definePageMeta({
+  layout: false,
+})
+
+const poiChoosed = ref([])
 const mapContainer = ref(null);
 const poi = ref(null);
+const mappoint = ref(null);
 const { $ol, $config } = useNuxtApp();
+const dialog = ref(false);
+
+const walk_status = ref(false);
+
+
+const searchPoiValue = ref('')
+const searchResult = ref([])
+const searchPoi = async function () {
+  try {
+    const queryParams = {
+      name: searchPoiValue.value || undefined,
+      description: searchPoiValue.value || undefined,
+      fromDate: undefined,
+      toDate: undefined,
+      fromLat: undefined,
+      toLat: undefined,
+      fromLng: undefined,
+      toLng: undefined
+    };
+    const response = await $fetch(`${$config.public.backendUrl}/api/poi/filtr`, {
+      method: 'POST',
+      body: queryParams
+    });
+
+    searchResult.value = response.map(poi => {
+      poi.images = JSON.parse(poi.images)
+      return poi
+    })
+
+  } catch (err) {
+    console.error('Ошибка фильтрации:', err);
+  }
+}
+
+
 
 let map = null
+let pointsLayer = null
+let routeLayer = null
 
 const drawPoints = (points) => {
   var features = []
   points.forEach(poi => {
-    console.log('poi:', poi);
-    features.push(new $ol.Feature(new $ol.Point($ol.fromLonLat(poi))))
+    features.push(new $ol.Feature({
+      geometry: new $ol.Point($ol.fromLonLat([poi.location.x, poi.location.y])),
+      poi: poi,
+      isChoosed: function () {
+        return poiChoosed.value.includes(poi.id)
+      }
+    }))
   })
-  console.log('features:', features);
   const cluster = new $ol.Cluster({
-    distance: 30,
-    minDistance: 20,
+    distance: 40,
+    // minDistance: 20,
     source: new $ol.VectorSource({ features })
   })
   const veclayer = new $ol.VectorLayer({
     source: cluster,
     style: $ol.pointStyle
   })
+  veclayer.setZIndex(2)
   map.addLayer(veclayer)
+  pointsLayer = veclayer
 }
+
+const popup = ref(null);
 
 onMounted(() => {
   let ar = [0, 0, 0, 0]
@@ -137,18 +202,53 @@ onMounted(() => {
     controls: []
   });
 
+  const overlay = new $ol.Overlay({
+    element: popup.value,
+    autoPan: {
+      animation: {
+        duration: 250,
+      },
+    },
+  });
+  map.addOverlay(overlay);
+
+  map.on('singleclick', (evt) => {
+    const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) { return feature })
+    if (!feature || feature.get('features').length > 1) {
+      overlay.setPosition(undefined);
+      closer.blur();
+      return false;
+    }
+    mappoint.value = feature.get('features')[0].values_.poi
+    const coordinate = evt.coordinate;
+    // popupContent.value.innerHTML = '<p>Всплывающее окно!</p>'
+    overlay.setPosition(coordinate);
+  });
+
+  map.on('pointermove', function (e) {
+    const i = map.forEachFeatureAtPixel(e.pixel, function (feature) {
+      return feature.get('features').length;
+    })
+    if (i > 1) {
+      return
+    }
+    const hit = map.hasFeatureAtPixel(e.pixel);
+    map.getTarget().style.cursor = hit ? 'pointer' : '';
+  });
+
   $fetch(`${$config.public.backendUrl}/api/poi`, {
     method: 'GET'
   }).then(res => {
-    poi.value = res
-    drawPoints(res.map(poi => [poi.location.x, poi.location.y]))
-    // drawPoints([[30.316229, 59.938732]])
+    poi.value = res.map(poi => {
+      poi.images = JSON.parse(poi.images)
+      return poi
+    })
+    drawPoints(poi.value)
   })
 });
 
 
 const zoomIn = () => {
-  console.log('poi:', poi.value);
   map.getView().animate({
     zoom: map.getView().getZoom() + 1,
     duration: 200
@@ -160,6 +260,116 @@ const zoomOut = () => {
     duration: 200
   });
 };
+const pointUpdate = () => {
+  pointsLayer.changed()
+}
+
+
+const valid = ref(false);
+const nameMessages = ref('');
+const route_name = ref('');
+const route_description = ref('');
+const route = ref({});
+
+const hash = ref(useRoute().hash)
+if (hash.value !== '') {
+  $fetch(`${$config.public.backendUrl}/api/routes/${hash.value.slice(1)}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('access_token')}`
+    },
+    onResponse: function ({ request, response, options }) {
+      if (response.status === 401) {
+        console.log('unauthorized')
+        localStorage.removeItem('access_token')
+        navigateTo('/signin')
+        return
+      }
+      route.value = response._data
+      buildRoute(route.value.points.map(p => p.id))
+    }
+  })
+}
+
+const createRoute = function () {
+  if (!valid.value) {
+    return
+  }
+  if (poiChoosed.length < 2) {
+    nameMessages.value = 'Выберите минимум 2 точки'
+    return
+  }
+  dialog.value = false
+
+
+  $fetch(`${$config.public.backendUrl}/api/routes`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('access_token')}`
+    },
+    body: {
+      name: route_name.value,
+      description: route_description.value,
+      points: poiChoosed.value
+    },
+    onResponse: function ({ request, response, options }) {
+
+      if (response.status === 401) {
+        console.log('unauthorized')
+        localStorage.removeItem('access_token')
+        navigateTo('/signin')
+        return
+      }
+      route.value = response._data
+      buildRoute(route.value.points.map(p => p.id))
+    }
+  })
+}
+
+const buildRoute = (array) => {
+  walk_status.value = true
+  // pointsLayer.getSource().clear()
+  // poi.value = poiChoosed.value.map(id => {
+  //   var res = $fetch(`${$config.public.backendUrl}/api/poi:${id}`, {
+  //     method: 'GET'
+  //   })
+  //   res.image = JSON.parse(res.image)
+  //   return res
+  // })
+  // drawPoints(poi.value)
+
+  if (routeLayer) {
+    map.removeLayer(routeLayer)
+  }
+  $fetch(`${$config.public.backendUrl}/api/routes/build`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('access_token')}`
+    },
+    body: array,
+    onResponse: function ({ request, response, options }) {
+      const path = response._data.map(p => p.path)
+      var pathList = [path[0].start.properties.intersection_location]
+      for (let i = 0; i < path.length; i++) {
+        pathList.push(...path[i].segments.map(segment => {
+          return segment.end.properties.intersection_location
+        }))
+      }
+      routeLayer = new $ol.VectorLayer({
+        source: new $ol.VectorSource({
+          features: [new $ol.Feature({
+            geometry: new $ol.LineString(pathList.map(point => $ol.fromLonLat([point.x, point.y]))),
+            properties: {}
+          })]
+        }),
+        style: $ol.routeStyle
+      })
+      routeLayer.setZIndex(1)
+      map.addLayer(routeLayer)
+    }
+  })
+}
+
 </script>
 
 <script>
@@ -168,85 +378,28 @@ export default {
     return {
       drawer: false,
       dialog: false,
-      poi: [],
-      route_photo: 'https://sun9-34.userapi.com/s/v1/if1/Vk16_2miu_8rH8feSCI9JQqKKo95_us3mpBj29yfl7eGlxTrhlsvHG1e4woP7zhL2ebmcqOY.jpg?quality=96&as=32x24,48x36,72x54,108x81,160x121,240x181,360x272,480x362,540x408,640x483,720x543,848x640&from=bu&u=uAHL8XlnpBJYoXpEVgSlF6bfJuPn356m_8Ct00hdzxc&cs=848x640',
-      column: [
-        {
-          id: 1,
-          name: 'Училище правоведения',
-          main_photo: 'https://p0.citywalls.ru/thumb0_586-600700.jpg?mt=1674505477'
+      valid: false,
+      route_name: '',
+      route_description: '',
+      nameMessages: '',
+      route: {},
+      rules: {
+        name: function (value) {
+          if (value.length < 4) {
+            return 'Минимум 4 символа'
+          }
+          if (value.length > 50) {
+            return 'Максимум 50 символов'
+          }
+          return true
         },
-        {
-          id: 2,
-          name: 'Особняк Е. М. Бутурлиной',
-          main_photo: 'https://p0.citywalls.ru/thumb0_0-32.jpg?mt=1273625807'
-        },
-        {
-          id: 3,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 4,
-          name: 'Особняк князя Л. В. Кочубеяgggggddddddddddddddddggggg gggggggggg ggggggggg',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 5,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 6,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 7,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 8,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 9,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 10,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 11,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 12,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 13,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 14,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
-        },
-        {
-          id: 15,
-          name: 'Особняк князя Л. В. Кочубея',
-          main_photo: 'https://p0.citywalls.ru/thumb0_545-559084.jpg?mt=1650825491'
+        description: function (value) {
+          if (value.length > 2000) {
+            return 'Максимум 2000 символов'
+          }
+          return true
         }
-      ]
+      }
     }
   }
 }
@@ -273,5 +426,42 @@ export default {
 
 .v-btn {
   z-index: 1001;
+}
+
+.ol-popup {
+  position: absolute;
+  background-color: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #cccccc;
+  bottom: 12px;
+  left: -50px;
+  min-width: 280px;
+}
+
+.ol-popup:after,
+.ol-popup:before {
+  top: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.ol-popup:after {
+  border-top-color: white;
+  border-width: 10px;
+  left: 48px;
+  margin-left: -10px;
+}
+
+.ol-popup:before {
+  border-top-color: #cccccc;
+  border-width: 11px;
+  left: 48px;
+  margin-left: -11px;
 }
 </style>

@@ -163,6 +163,116 @@ export class RoutesService {
         }
     }
 
+    async findAllFiltr(filtr: any) {
+        const session = this.neo4jService.getReadSession();
+        try {
+            const queryParams: any = {};
+            const conditions: string[] = [];
+
+            if (filtr.name) {
+                conditions.push('LOWER(route.route_name) =~ LOWER($name)');
+                queryParams.name = `(?i).*${filtr.name.toLowerCase()}.*`;
+            }
+            if (filtr.description) {
+                conditions.push('LOWER(route.route_description) =~ LOWER($description)');
+                queryParams.description = `(?i).*${filtr.description.toLowerCase()}.*`;
+            }
+            if (filtr.fromDate) {
+                conditions.push('route.route_created_at >= datetime($fromDate)');
+                queryParams.fromDate = filtr.fromDate;
+            }
+            if (filtr.toDate) {
+                conditions.push('route.route_created_at <= datetime($toDate)');
+                queryParams.toDate = filtr.toDate;
+            }
+            if (filtr.fromDuration) {
+                conditions.push('route.route_duration >= $fromDuration');
+                queryParams.fromDuration = filtr.fromDuration;
+            }
+            if (filtr.toDuration) {
+                conditions.push('route.route_duration <= $toDuration');
+                queryParams.toDuration = filtr.toDuration;
+            }
+            if (filtr.fromLength) {
+                conditions.push('route.route_length >= $fromLength');
+                queryParams.fromLength = filtr.fromLength;
+            }
+            if (filtr.toLength) {
+                conditions.push('route.route_length <= $toLength');
+                queryParams.toLength = filtr.toLength;
+            }
+            if (filtr.author) {
+                conditions.push('LOWER(user.name) =~ LOWER($author)');
+                queryParams.author = `(?i).*${filtr.author.toLowerCase()}.*`;
+            }
+            if (filtr.points) {
+                conditions.push(`
+                    ALL(d IN $points 
+                        WHERE EXISTS { 
+                            MATCH (route)-[:INCLUDE]->(poi:PointOfInterest) 
+                            WHERE elementId(poi) = d 
+                        }
+                    )
+                `);
+                queryParams.points = filtr.points;
+            }
+
+            let query = `
+                MATCH (user:User)-[:CREATED]->(route:Route)
+            `;
+
+            if (conditions.length > 0) {
+                query += '\nWHERE ' + conditions.join('\nAND ');
+            }
+
+            query += `
+                \nCALL (route) {
+                    MATCH (route)-[inc :INCLUDE]->(poi :PointOfInterest)
+                    RETURN poi
+                    ORDER BY inc.order
+                }
+            `
+
+            query += '\nRETURN route, user, collect(poi) AS poi_list';
+
+            const result = await session.run(query, queryParams);
+            return result.records.map(record => {
+                const node = record.get('route');
+
+                const poiList: PointOfInterest[] = record.get('poi_list').map(poi => new PointOfInterest(
+                    poi.elementId,
+                    poi.properties.poi_name,
+                    poi.properties.poi_description,
+                    poi.properties.poi_images,
+                    poi.properties.poi_location,
+                    poi.properties.poi_created_at.toString(),
+                ));
+                const userNode = record.get('user');
+                const user = new User(
+                    userNode.elementId,
+                    userNode.properties.name,
+                    userNode.properties.email,
+                    undefined,
+                    userNode.properties.role,
+                    userNode.properties.created_at.toString()
+                );
+                return new Route(
+                    node.elementId,
+                    node.properties.route_name,
+                    node.properties.route_description,
+                    node.properties.route_length,
+                    node.properties.route_duration,
+                    node.properties.route_created_at.toString(),
+                    poiList,
+                    user
+                );
+            });
+        }
+        finally {
+            await session.close();
+        }
+    }
+
     async findOne(id: string) {
         const session = this.neo4jService.getReadSession();
         try {

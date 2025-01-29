@@ -19,7 +19,7 @@
             </v-avatar>
             <v-col class="pl-10 align-center" justify="center">
               <v-card-title class="text-h5 font-weight-bold">{{ route?.name ?? '' }}</v-card-title>
-              <v-col justify="center" align="left"><v-btn>Посмотреть на карте</v-btn></v-col>
+              <v-col justify="center" align="left"><v-btn :to="`/map#${routeId}`">Посмотреть на карте</v-btn></v-col>
             </v-col>
           </div>
           <v-col></v-col>

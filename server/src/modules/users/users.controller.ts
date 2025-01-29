@@ -21,4 +21,22 @@ export class UsersController {
         }
         return this.usersService.findOne(id);
     }
+
+    @UseInterceptors(ClassSerializerInterceptor)
+    @Get()
+    async findAll(@Req() req) {
+        if (req.user.role != 'ADMIN') {
+            throw new ForbiddenException();
+        }
+        return this.usersService.findAll();
+    }
+
+    @UseInterceptors(ClassSerializerInterceptor)
+    @Post('filtr')
+    async findAllFiltr(@Body() filtr: any, @Req() req) {
+        if (req.user.role != 'ADMIN') {
+            throw new ForbiddenException();
+        }
+        return this.usersService.findAllFiltr(filtr);
+    }
 }

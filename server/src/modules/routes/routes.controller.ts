@@ -36,6 +36,11 @@ export class RoutesController {
 
     }
 
+    @Post('/filtr')
+    async findAllFiltr(@Body() filtr: any) {
+        return this.RoutesService.findAllFiltr(filtr);
+    }
+
     @Get(':id')
     async findOne(@Param('id') id: string) {
         return this.RoutesService.findOne(id);
