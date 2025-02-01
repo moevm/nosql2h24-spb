@@ -80,7 +80,7 @@
                 </v-card-title>
 
                 <div class="px-4 pt-2">
-                    <SearchField @input="searchPoi" v-model="searchPoiValue"></SearchField>
+                    <SearchField label="" @input="searchPoi" v-model="searchPoiValue"></SearchField>
                 </div>
 
                 <v-card-text class="pa-0 flex-grow-1 d-flex flex-column">
