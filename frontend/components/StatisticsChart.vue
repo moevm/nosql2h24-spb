@@ -1,5 +1,5 @@
 <template>
-  <v-row>
+  <v-row class="ml-5 mr-5">
       <v-col>
         <div>
           <v-btn 
@@ -16,6 +16,7 @@
       <v-col>
         <p>Y:</p>
         <DropDownFeild 
+          v-if="data"
           :items="yLabels" 
           v-model="this.yLabel" 
           @update:data="setYLabel"
@@ -24,6 +25,7 @@
       <v-col>
         <p>X:</p>
         <DropDownFeild 
+          v-if="data"
           :items="xLabels" 
           v-model="this.xLabel" 
           @update:data="setXLabel"
@@ -57,14 +59,14 @@
         },
         // tableData: ref([]),
         elementsNum: 0,
-        yLabel: "_Y_",
-        xLabel: "_X_"
+        yLabel: ref("_Y_"),
+        xLabel: ref("_X_")
       }
     },
-    created() {
+    mounted() {
       if (this.data) {
-        this.xLabel = xLabels[0]
-        this.yLabel = yLabels[0]
+        this.xLabel = Object.values(this.data[1].result.xLabels)[0]
+        this.yLabel = Object.values(this.data[1].result.yLabels)[0]
       }
     },
     computed: {
