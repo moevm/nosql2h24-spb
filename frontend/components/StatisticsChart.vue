@@ -10,24 +10,30 @@
           </v-btn>
         </div>
         <div class="pt-3">
-          Найдено элементов: {{ elementsNum }}
+          Обработано элементов: {{ elementsNum }}
         </div>
       </v-col>
       <v-col>
-                    <DropDownFeild 
-                        :items="Object.keys(this.dataBaseEntities)" 
-                        v-model="this.chosenEntity" 
-                        @update:data="handleUpdate"
-                    />
-                    <DropDownFeild 
-                        :items="Object.keys(this.dataBaseEntities)" 
-                        v-model="this.chosenEntity" 
-                        @update:data="handleUpdate"
-                    />
-        <!-- <p>{{ tableData }}</p> -->
+        <p>Y:</p>
+        <DropDownFeild 
+          :items="yLabels" 
+          v-model="this.yLabel" 
+          @update:data="setYLabel"
+        />
+      </v-col>
+      <v-col>
+        <p>X:</p>
+        <DropDownFeild 
+          :items="xLabels" 
+          v-model="this.xLabel" 
+          @update:data="setXLabel"
+        />
       </v-col>
   </v-row>
   <BarChart :data="chartData"/>
+  <!-- <v-row  v-if="this.parsedFilterData().result.type === 'chart'"> -->
+
+  <!-- </v-row> -->
 </template>
    
 
@@ -50,7 +56,15 @@
           ]
         },
         // tableData: ref([]),
-        elementsNum: 0
+        elementsNum: 0,
+        yLabel: "_Y_",
+        xLabel: "_X_"
+      }
+    },
+    created() {
+      if (this.data) {
+        this.xLabel = xLabels[0]
+        this.yLabel = yLabels[0]
       }
     },
     computed: {
@@ -61,17 +75,29 @@
                 return []
             }
         },
-        yLabel() {
-          if (this.parsedFilterData()) {
-            return this.parsedFilterData().result.yLabels[0]
+        yLabels() {
+          if(this.data) {
+            // console.log(Object.values(this.data[1].result.yLabels))
+            return Object.values(this.data[1].result.yLabels)
+          } else {
+            return []
           }
-          return ""
         },
-        xLabel() {
-          return ""
-        }
+        xLabels() {
+          if(this.data) {
+            return Object.values(this.data[1].result.xLabels)
+          } else {
+            return []
+          }
+        },
     },
     methods: {
+      setYLabel(data) {
+        this.yLabel = data
+      },
+      setXLabel(data) {
+        this.xLabel = data
+      },
 
       getFilterValue(label, text) {
         return this.parsedFilterData.find((elem) => {
@@ -115,8 +141,9 @@
           let labels = []
           let data = []
           response.map(item => {
-            labels.push(item.name)
-            data.push(item.images.length || 0)
+            console.log(item.description.length)
+            labels.push(this.getChartDataLabel(item))
+            data.push(this.getChartDataDataset(item))
           })
           this.elementsNum = response.length
 
@@ -124,7 +151,7 @@
             labels: labels,
             datasets: [
               {
-                label: 'Data One',
+                label: this.yLabel,
                 backgroundColor: '#f87979',
                 data: data
               }
@@ -134,7 +161,23 @@
         } catch (err) {
           console.error('Ошибка фильтрации:', err);
         }
+      },
+
+      getChartDataLabel(item) {
+        if (this.xLabel === "Название объекта") {
+          return item.name
+        } else if (this.xLabel === "Дата создания записи") {
+          return item.createdAt
+        }
+      },
+      getChartDataDataset(item) {
+        if (this.yLabel === "Число изображений") {
+          return item.images.length
+        } else if (this.yLabel === "Длина описания") {
+          return item.description.length
+        }
       }
+
     }
   }
   </script> 

@@ -11,7 +11,7 @@
                     />
                 </v-col>
             </v-row>
-            {{ filterData }}
+            <!-- {{ filterData }} -->
             <v-row class="ml-5 mr-5 headline">
                 <v-col>
                     <p>Фильтры</p>
@@ -21,16 +21,7 @@
                 :filterData="filterData"
                 v-model="filterData"
             />
-            <!-- <StatisticsChart /> -->
-            <!-- <StatisticsChart 
-                :chartData="chartData"
-                :options="options"
-            /> -->
             <StatisticsChart :data="filterData" />
-            <!-- <BarChart :data="chartData"/> -->
-
-            <!-- <AccordionFeild /> -->
-            <!-- <p>Статистика</p> -->
         </v-card-text>
     </v-card>
 
@@ -43,7 +34,7 @@ export default {
         return { 
             pageStructure: {
                 user: {
-                    entity: "Пользователь",
+                    entity: "Пользователь (В разработке)",
                     params: [
                         {
                             label: "Пройденное расстояние",
@@ -106,10 +97,21 @@ export default {
                                 },
                             ]
                         },
-                    ]
+                    ],
+                    result: {
+                        type: "chart",
+                        xLabels: [
+                            "Название объекта",
+                            "Дата создания записи"
+                        ],
+                        yLabels: [
+                            "Число изображений",
+                            "Длина описания"
+                        ]
+                    }
                 },
                 route: {
-                    entity: "Маршрут",
+                    entity: "Маршрут (В разработке)",
                     params: [
                         {
                             label: "Длина",
@@ -196,7 +198,49 @@ export default {
                                 },
                             ]
                         },
-                    ]
+                    ],
+                    result: {
+                        type: "chart",
+                        xLabels: [
+                            "Название объекта",
+                            "Дата создания записи"
+                        ],
+                        yLabels: [
+                            "Число изображений",
+                            "Длина описания"
+                        ]
+                    }
+                },
+                searchShortestPath: {
+                    entity: "Поиск кратчайшего пути между точками (В разработке)",
+                    params: [
+                        {
+                            label: "Исходная и конечная точки",
+                            fields: [
+                                {
+                                    type: "button",
+                                    text: "Добавить исходную точку",
+                                    value: null
+                                },
+                                {
+                                    type: "button",
+                                    text: "Добавить конечную точку",
+                                    value: null
+                                },
+                            ]
+                        },
+                    ],
+                    result: {
+                        type: "chart",
+                        xLabels: [
+                            "Название объекта",
+                            "Дата создания записи"
+                        ],
+                        yLabels: [
+                            "Число изображений",
+                            "Длина описания"
+                        ]
+                    }
                 },
                 searchPoint: {
                     entity: "Поиск точки",
@@ -223,29 +267,78 @@ export default {
                             "Длина описания"
                         ]
                     }
-                }
-            },
-            chartData: {
-                labels: [
-                    'January',
-                    'February',
-                    'March',
-                    'April',
-                    'May',
-                    'June',
-                    'July',
-                    'August',
-                    'September',
-                    'October',
-                    'November',
-                    'December'
-                ],
-                datasets: [
-                    {
-                        label: 'Data One',
-                        data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
+                },
+                countRouteLength: {
+                    entity: "Расчёт длины маршрута (В разработке)",
+                    params: [
+                        {
+                            label: "Исходная и конечная точки",
+                            fields: [
+                                {
+                                    type: "button",
+                                    text: "Добавить исходную точку",
+                                    value: null
+                                },
+                                {
+                                    type: "button",
+                                    text: "Добавить конечную точку",
+                                    value: null
+                                },
+                            ]
+                        },
+                    ],
+                    result: {
+                        type: "chart",
+                        xLabels: [
+                            "Название объекта",
+                            "Дата создания записи"
+                        ],
+                        yLabels: [
+                            "Число изображений",
+                            "Длина описания"
+                        ]
                     }
-                ]
+                },
+                renewRouteLength: {
+                    entity: "Обновление длины маршрута (В разработке)",
+                    params: [
+                        {
+                            label: "Исходная и конечная точки",
+                            fields: [
+                                {
+                                    type: "button",
+                                    text: "Добавить исходную точку",
+                                    value: null
+                                },
+                                {
+                                    type: "button",
+                                    text: "Добавить конечную точку",
+                                    value: null
+                                },
+                            ],
+                            label: "Новая длина",
+                            fields: [
+                                {
+                                    type: "number",
+                                    text: "Указать новую длину (км)",
+                                    value: 0
+                                },
+                            ],
+                        },
+                    ],
+                    result: {
+                        type: "chart",
+                        xLabels: [
+                            "Название объекта",
+                            "Дата создания записи"
+                        ],
+                        yLabels: [
+                            "Число изображений",
+                            "Длина описания"
+                        ]
+                    }
+                },
+
             },
             dataBaseEntities: {},
             chosenEntity: null,
