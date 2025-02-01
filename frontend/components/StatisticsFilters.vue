@@ -12,6 +12,7 @@
                     <div v-if="field.type == 'number'">
                         {{ field.text }}
                         <TextField
+                            label=""
                             v-model="field.value"
                             type="number"
                         />
@@ -19,6 +20,7 @@
                     <div v-else-if="field.type == 'decimal'">
                         {{ field.text }}
                         <TextField
+                            label=""
                             step="0.1"
                             v-model="field.value"
                             type="number"
@@ -29,6 +31,14 @@
                             :label="field.text"
                             v-model="field.value"
                             type="date"
+                        />
+                    </div>
+                    <div v-else-if="field.type == 'text'">
+                        {{ field.text }}
+                        <TextField
+                            :label="field.text"
+                            v-model="field.value"
+                            type="text"
                         />
                     </div>
                 </div>

@@ -17,10 +17,18 @@
                     <p>Фильтры</p>
                 </v-col>
             </v-row>
-                <StatisticsFilters 
-                    :filterData="filterData"
-                    v-model="filterData"
-                />
+            <StatisticsFilters 
+                :filterData="filterData"
+                v-model="filterData"
+            />
+            <!-- <StatisticsChart /> -->
+            <!-- <StatisticsChart 
+                :chartData="chartData"
+                :options="options"
+            /> -->
+            <StatisticsChart :data="filterData" />
+            <!-- <BarChart :data="chartData"/> -->
+
             <!-- <AccordionFeild /> -->
             <!-- <p>Статистика</p> -->
         </v-card-text>
@@ -189,7 +197,55 @@ export default {
                             ]
                         },
                     ]
+                },
+                searchPoint: {
+                    entity: "Поиск точки",
+                    params: [
+                        {
+                            label: "Название точки",
+                            fields: [
+                                {
+                                    type: "text",
+                                    text: "Введите название места",
+                                    value: ""
+                                }
+                            ]
+                        },
+                    ],
+                    result: {
+                        type: "chart",
+                        xLabels: [
+                            "Название объекта",
+                            "Дата создания записи"
+                        ],
+                        yLabels: [
+                            "Число изображений",
+                            "Длина описания"
+                        ]
+                    }
                 }
+            },
+            chartData: {
+                labels: [
+                    'January',
+                    'February',
+                    'March',
+                    'April',
+                    'May',
+                    'June',
+                    'July',
+                    'August',
+                    'September',
+                    'October',
+                    'November',
+                    'December'
+                ],
+                datasets: [
+                    {
+                        label: 'Data One',
+                        data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
+                    }
+                ]
             },
             dataBaseEntities: {},
             chosenEntity: null,
