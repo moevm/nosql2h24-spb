@@ -2,7 +2,7 @@
   <v-app dark>
     <v-navigation-drawer v-model="drawer" color="secondary" width="400" floating>
       <div class="d-flex flex-column overflow-hidden" style="height: 100%;">
-        <SearchField :readonly="walk_status" @input="searchPoi" v-model="searchPoiValue" class="mx-4 mt-4 flex-0-0">
+        <SearchField label="" :readonly="walk_status" @input="searchPoi" v-model="searchPoiValue" class="mx-4 mt-4 flex-0-0">
         </SearchField>
         <v-container class="flex-grow-1 d-flex flex-column overflow-auto">
 

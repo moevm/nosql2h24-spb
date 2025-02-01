@@ -35,7 +35,7 @@
             <Btn label="Пользователи" to="/st/user" density="comfortable"></Btn>
           </div>
           <div class="d-flex align-center ga-2">
-            <SearchField hide-details rounded="xl" density="comfortable" v-model="filters.search"></SearchField>
+            <SearchField label="" hide-details rounded="xl" density="comfortable" v-model="filters.search"></SearchField>
             <Btn @click="openFilters()" density="comfortable" label="Фильтры"></Btn>
           </div>
           <v-card v-if="filtersOpened" color="secondary" height="auto" class="pa-3">
@@ -44,12 +44,12 @@
                 <v-card-text>Длина, м</v-card-text>
                 <div class="d-flex justify-space-between">
                   <v-card-text>От</v-card-text>
-                  <TextField v-model="filters.minLength"></TextField>
+                  <TextField label="" v-model="filters.minLength"></TextField>
                 </div>
 
                 <div class="d-flex justify-space-between">
                   <v-card-text>До</v-card-text>
-                  <TextField v-model="filters.maxLength"></TextField>
+                  <TextField label="" v-model="filters.maxLength"></TextField>
                 </div>
 
               </v-col>
@@ -58,12 +58,12 @@
                 <v-card-text>Длительность, мин</v-card-text>
                 <div class="d-flex justify-space-between">
                   <v-card-text>От</v-card-text>
-                  <TextField v-model="filters.minDuration"></TextField>
+                  <TextField label="" v-model="filters.minDuration"></TextField>
                 </div>
 
                 <div class="d-flex justify-space-between">
                   <v-card-text>До</v-card-text>
-                  <TextField v-model="filters.maxDuration"></TextField>
+                  <TextField label="" v-model="filters.maxDuration"></TextField>
                 </div>
               </v-col>
 
@@ -71,12 +71,12 @@
                 <v-card-text>Количество точек интереса</v-card-text>
                 <div class="d-flex justify-space-between">
                   <v-card-text>От</v-card-text>
-                  <TextField v-model="filters.minPoiCount"></TextField>
+                  <TextField label="" v-model="filters.minPoiCount"></TextField>
                 </div>
 
                 <div class="d-flex justify-space-between">
                   <v-card-text>До</v-card-text>
-                  <TextField v-model="filters.maxPoiCount"></TextField>
+                  <TextField label="" v-model="filters.maxPoiCount"></TextField>
                 </div>
               </v-col>
             </v-row>
@@ -85,12 +85,12 @@
                 <v-card-text>Дата создания</v-card-text>
                 <div class="d-flex justify-space-between">
                   <v-card-text>От</v-card-text>
-                  <TextField type="date" v-model="filters.minDate"></TextField>
+                  <TextField label="" type="date" v-model="filters.minDate"></TextField>
                 </div>
 
                 <div class="d-flex justify-space-between">
                   <v-card-text>До</v-card-text>
-                  <TextField type="date" v-model="filters.maxDate"></TextField>
+                  <TextField label="" type="date" v-model="filters.maxDate"></TextField>
                 </div>
 
               </v-col>
